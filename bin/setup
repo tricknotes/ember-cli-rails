@@ -6,8 +6,6 @@ echo '-- Set up Ruby dependencies via Bundler'
 gem install bundler --conservative
 bundle check || bundle install
 
-bin/rake webdrivers:chromedriver:update
-
 # Add binstubs to PATH via export PATH=".git/safe/../../bin:$PATH" in ~/.zshenv
 mkdir -p .git/safe
 
