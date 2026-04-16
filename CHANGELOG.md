@@ -1,6 +1,11 @@
 main
 ------
 
+0.12.3
+------
+
+* Fix compatibility with Rails 8 (#627)
+
 0.12.2
 ------
 
