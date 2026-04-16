@@ -4,7 +4,7 @@ main
 0.12.3
 ------
 
-* Fix compatibility with Rails 8 (#627)
+* Remove deprecation warning for Rails 8 (#617)
 
 0.12.2
 ------
