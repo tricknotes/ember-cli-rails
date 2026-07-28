@@ -9,10 +9,6 @@ bundle check || bundle install
 # Add binstubs to PATH via export PATH=".git/safe/../../bin:$PATH" in ~/.zshenv
 mkdir -p .git/safe
 
-if ! command -v bower > /dev/null; then
-  npm install -g bower
-fi
-
 bin/setup_ember spec/dummy/my-app
 
 echo '-- Install Ember dependencies'

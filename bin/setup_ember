@@ -2,28 +2,47 @@
 
 set -e
 
+# EMBER_VERSION selects the `ember-cli/ember-new-output` tag to clone.
+# Versions >= 6.8 use the Vite-based app blueprint, older versions use the
+# classic Broccoli-based build.
+EMBER_VERSION="${EMBER_VERSION:-7.0.0}"
+
 setup_ember() {
   local target="${1-spec/dummy/my-app}"
 
   if ! [ -d $target ]; then
-    git clone -b 'v4.0.0' https://github.com/ember-cli/ember-new-output.git $target
+    git clone -b "v${EMBER_VERSION}" https://github.com/ember-cli/ember-new-output.git $target
 
-    echo '-- Make router catchall routes'
-    sed -i -e "s/'auto'/'hash'/" $target/config/environment.js
+    echo '-- Use hash location to serve the app from any mount point'
+    sed -i -e "s/locationType: '\(auto\|history\)'/locationType: 'hash'/" $target/config/environment.js
 
     echo '-- Add an image to a template'
+    if [ -f "$target/app/templates/application.gjs" ]; then
+      # The Vite blueprint ships an `application.gjs`, which would conflict
+      # with the `application.hbs` fixture.
+      rm "$target/app/templates/application.gjs"
+    fi
     cp spec/fixtures/application.hbs $target/app/templates/application.hbs
 
     mkdir -p $target/public/assets
     cp spec/fixtures/logo.png $target/public/assets
 
-    echo '-- Install ember-cli-rails-addon'
-    cd $target &&
-      npm install --save-dev ember-cli-rails-addon@rondale-sc/ember-cli-rails-addon
+    if [ -f "$target/vite.config.mjs" ]; then
+      # `ember-cli-rails-addon` is incompatible with the Vite-based
+      # blueprint, and `ember-cli-rails` does not require it there.
+      echo '-- Install NPM dependencies'
+      cd $target &&
+        npm install
+    else
+      echo '-- Install ember-cli-rails-addon'
+      cd $target &&
+        npm install --save-dev ember-cli-rails-addon@rondale-sc/ember-cli-rails-addon
+    fi
 
-    if [ -f "$target/bower.json" ]; then
+    if [ -f "bower.json" ]; then
       echo '-- Install Bower dependencies'
-      cd $target && bower install
+      command -v bower > /dev/null || npm install -g bower
+      bower install
     fi
 
     echo '-- Successfully setup Ember'

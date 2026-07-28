@@ -90,7 +90,8 @@ EmberCli.configure do |c|
 end
 ```
 
-Next, install the [ember-cli-rails-addon][addon]:
+Next, if your Ember application uses the classic (Broccoli-based) build
+(generated with `ember-cli < 6.8`), install the [ember-cli-rails-addon][addon]:
 
 ```bash
 $ cd path/to/frontend
@@ -110,6 +111,10 @@ For instance, if you're using the `0.6.x` version of the gem, specify
   }
 }
 ```
+
+If your Ember application uses the Vite-based build (generated with
+`ember-cli >= 6.8`), do **not** install the addon: it is incompatible with the
+Vite-based build, and `ember-cli-rails` does not require it there.
 
 [addon]: https://github.com/rondale-sc/ember-cli-rails-addon/
 [semver]: http://semver.org/
@@ -170,6 +175,17 @@ suites, configure the `default` task to depend on both `spec` and `ember:test`.
 ```rb
 task default: [:spec, "ember:test"]
 ```
+
+**Vite-based applications**
+
+When Rails is running in development mode, classic (Broccoli-based) Ember
+applications are built with `ember build --watch`, so changes to the Ember
+application are picked up automatically.
+
+Vite-based Ember applications (generated with `ember-cli >= 6.8`) are instead
+built once, synchronously, when they are first requested. To pick up changes
+to the Ember application, restart the Rails server, or iterate on the Ember
+application directly with its own development server (`npm start`).
 
 ## Deploy
 
@@ -449,6 +465,12 @@ actively supported method of serving EmberCLI applications.
 However, for the sake of backwards compatibility, `ember-cli-rails` supports
 injecting the EmberCLI-generated assets into an existing Rails layout.
 
+**Note:** these helpers are only supported for classic (Broccoli-based)
+applications. Vite-based applications (generated with `ember-cli >= 6.8`) load
+their configuration from a `<meta>` tag in the generated `index.html` and use
+ES module script tags, which these helpers cannot inject. Use
+`render_ember_app` instead.
+
 Following the example above, configure the mounted EmberCLI application to be
 served by a custom controller (`ApplicationController`, in this case).
 
@@ -654,7 +676,19 @@ if (environment === 'development') {
 
 This project supports:
 
-* EmberCLI versions `>= 1.13.13`
+* EmberCLI versions `>= 1.13.13` using the classic (Broccoli-based) build,
+  together with [ember-cli-rails-addon][addon]
+* EmberCLI versions `>= 6.8` using the Vite-based build, without the addon
+
+The test suite currently exercises the `5.12.x` and `6.7.x` (classic) and
+`7.0.x` (Vite) series.
+
+Note the following limitations for Vite-based applications:
+
+* `include_ember_script_tags` and `include_ember_stylesheet_tags` are not
+  supported — use `render_ember_app` instead
+* in development, the application is built synchronously on first request
+  instead of being rebuilt on file changes
 
 ## Ruby and Rails support
 

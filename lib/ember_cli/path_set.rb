@@ -39,6 +39,13 @@ module EmberCli
       root.join("bower.json")
     end
 
+    # Apps generated with the Vite-based blueprint (`ember-cli >= 6.8`)
+    # ship a Vite config file at their root.
+    def vite?
+      %w[vite.config.mjs vite.config.js vite.config.ts].
+        any? { |config| root.join(config).exist? }
+    end
+
     def ember
       @ember ||= begin
         root.join("node_modules", "ember-cli", "bin", "ember").tap do |path|

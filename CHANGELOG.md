@@ -1,6 +1,9 @@
 main
 ------
 
+* Support Ember applications generated with the Vite-based blueprint
+  (`ember-cli >= 6.8`), without `ember-cli-rails-addon`
+
 0.12.3
 ------
 
