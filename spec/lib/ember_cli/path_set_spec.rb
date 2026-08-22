@@ -159,7 +159,7 @@ describe EmberCli::PathSet do
     it "is false when the app has no Vite config" do
       path_set = build_path_set
 
-      expect(path_set.vite?).to be false
+      expect(path_set).not_to be_vite
     end
 
     it "is true when the app has a vite.config.mjs" do
@@ -167,7 +167,7 @@ describe EmberCli::PathSet do
       create_file(app_root_for(app).join("vite.config.mjs"))
       path_set = build_path_set(app: app)
 
-      expect(path_set.vite?).to be true
+      expect(path_set).to be_vite
     end
 
     it "is true when the app has a vite.config.js" do
@@ -175,7 +175,7 @@ describe EmberCli::PathSet do
       create_file(app_root_for(app).join("vite.config.js"))
       path_set = build_path_set(app: app)
 
-      expect(path_set.vite?).to be true
+      expect(path_set).to be_vite
     end
   end
 
