@@ -20,15 +20,43 @@ module EmberCli
     def build_and_watch
       unless running?
         lock_buildfile
-        self.pid = spawn ember.build(watch: true)
+        self.pid = spawn(
+          ember.build(watch: true),
+          err: paths.build_error_file.to_s,
+        )
         detach
       end
     end
 
+    def start_dev_server(host:, port:)
+      unless dev_server_running?
+        # Run the development server in its own process group so that the
+        # whole tree can be signaled when Rails exits.
+        self.dev_server_pid = spawn(
+          ember.dev_server(host: host, port: port),
+          out: [paths.log.to_s, "a"],
+          err: [:child, :out],
+          pgroup: true,
+        )
+        Process.detach(dev_server_pid)
+      end
+
+      dev_server_pid
+    end
+
+    def dev_server_running?
+      process_running?(dev_server_pid)
+    end
+
     def stop
       if pid.present?
-        Process.kill(:INT, pid)
+        signal(pid)
         self.pid = nil
+      end
+
+      if dev_server_pid.present?
+        signal(-dev_server_pid)
+        self.dev_server_pid = nil
       end
     end
 
@@ -58,7 +86,7 @@ module EmberCli
 
     private
 
-    attr_accessor :pid
+    attr_accessor :dev_server_pid, :pid
     attr_reader :ember, :env, :options, :paths
 
     delegate :run, :run!, to: :runner
@@ -80,13 +108,19 @@ module EmberCli
       ].select(&:exist?)
     end
 
-    def spawn(command)
+    def spawn(command, **redirects)
       Kernel.spawn(
         env,
         command,
         chdir: paths.root.to_s,
-        err: paths.build_error_file.to_s,
+        **redirects,
       ) || exit(1)
+    end
+
+    def signal(process_id)
+      Process.kill(:INT, process_id)
+    rescue Errno::ESRCH, Errno::EPERM
+      nil
     end
 
     def runner
@@ -99,7 +133,11 @@ module EmberCli
     end
 
     def running?
-      pid.present? && Process.getpgid(pid)
+      process_running?(pid)
+    end
+
+    def process_running?(process_id)
+      process_id.present? && !!Process.getpgid(process_id)
     rescue Errno::ESRCH
       false
     end

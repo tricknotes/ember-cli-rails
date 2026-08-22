@@ -30,6 +30,13 @@ Rails.application.routes.draw do
   end
 
   mount_ember_app(
+    "my-app-dev-server",
+    to: "/dev-server",
+    # `get "/dev-server"` already claims the `dev_server` route name.
+    as: "dev_server_app",
+  )
+
+  mount_ember_app(
     "my-app",
     to: "/",
     as: "default",

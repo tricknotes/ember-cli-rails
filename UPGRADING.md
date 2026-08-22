@@ -17,10 +17,29 @@ following differences in how `ember-cli-rails` treats it:
   configuration meta tag, the stylesheet links, and the module script tags
   all together, while `include_ember_stylesheet_tags` supports only classic
   applications. This requires `ember-cli-rails-assets >= 0.8.0`.
-* In development, the application is built synchronously on first request
-  instead of being rebuilt on file changes. Restart the Rails server to pick
-  up changes, or iterate with the Ember application's own development server
-  (`npm start`).
+* In development, the application is served by Vite's development server —
+  the same one the application's `npm start` script runs. `ember-cli-rails`
+  starts it on the first request and shuts it down when Rails exits, and
+  rewrites the URLs in the `index.html` it serves so that the browser loads
+  the application's modules, and Vite's HMR client, from it directly. Changes
+  are hot-reloaded without restarting Rails.
+
+  Configure it, or opt out of it, with the `dev_server` option:
+
+  ```rb
+  EmberCli.configure do |c|
+    # listen on a fixed port instead of an available one
+    c.app :frontend, dev_server: { port: 4200 }
+
+    # build once, synchronously, on the first request instead
+    c.app :admin, dev_server: false
+  end
+  ```
+
+* `include_ember_script_tags` reads the output of `ember build`, which the
+  development server does not produce. Render Vite-based applications with
+  `render_ember_app`, or disable the development server with
+  `dev_server: false` to keep using the asset helpers.
 
 [Vite]: https://vitejs.dev
 

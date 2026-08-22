@@ -1,3 +1,11 @@
+main
+------
+
+* Serve Vite-based applications from Vite's development server in
+  `development`, so that changes are hot-reloaded instead of requiring a
+  restart. Configure it with the `dev_server` option, or opt out with
+  `dev_server: false`
+
 0.13.0.beta1
 ------
 

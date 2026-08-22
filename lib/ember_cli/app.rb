@@ -2,7 +2,9 @@ require "html_page/renderer"
 require "ember_cli/path_set"
 require "ember_cli/shell"
 require "ember_cli/build_monitor"
+require "ember_cli/deploy/dev_server"
 require "ember_cli/deploy/file"
+require "ember_cli/dev_server"
 
 module EmberCli
   class App
@@ -49,20 +51,15 @@ module EmberCli
 
     def build
       unless EmberCli.skip?
-        if development?
-          if paths.vite?
-            # The Vite-based blueprint (`ember-cli >= 6.8`) has no
-            # `ember-cli-rails-addon` to manage the build lock, so build
-            # synchronously instead of watching for changes.
-            compile
-          else
-            build_and_watch
-          end
-        elsif test?
-          compile
-        end
+        if dev_server?
+          # Vite's own development server rebuilds and hot-reloads the
+          # application, so there is nothing to build ahead of time.
+          dev_server.start
+        else
+          build_for_environment
 
-        @build.wait!
+          @build.wait!
+        end
       end
     end
 
@@ -106,6 +103,24 @@ module EmberCli
       deploy.to_rack
     end
 
+    def dev_server
+      @dev_server ||= DevServer.new(
+        name: name,
+        paths: paths,
+        shell: @shell,
+        options: dev_server_options,
+      )
+    end
+
+    # Whether this application is served by Vite's development server rather
+    # than out of the directory `ember build` writes to.
+    def dev_server?
+      strategy = deploy_strategy
+
+      strategy.is_a?(Class) &&
+        strategy.ancestors.include?(EmberCli::Deploy::DevServer)
+    end
+
     private
 
     def development?
@@ -124,9 +139,35 @@ module EmberCli
       strategy = options.fetch(:deploy, {})
 
       if strategy.respond_to?(:fetch)
-        strategy.fetch(rails_env, EmberCli::Deploy::File)
+        strategy.fetch(rails_env) { default_deploy_strategy }
       else
         strategy
+      end
+    end
+
+    def default_deploy_strategy
+      if development? && paths.vite? && dev_server_enabled?
+        EmberCli::Deploy::DevServer
+      else
+        EmberCli::Deploy::File
+      end
+    end
+
+    def dev_server_option
+      options.fetch(:dev_server, true)
+    end
+
+    def dev_server_enabled?
+      dev_server_option != false
+    end
+
+    def dev_server_options
+      option = dev_server_option
+
+      if option.respond_to?(:fetch)
+        option
+      else
+        {}
       end
     end
 
@@ -136,6 +177,21 @@ module EmberCli
 
     def env
       EmberCli.env
+    end
+
+    def build_for_environment
+      if development?
+        if paths.vite?
+          # The Vite-based blueprint (`ember-cli >= 6.8`) has no
+          # `ember-cli-rails-addon` to manage the build lock, so build
+          # synchronously instead of watching for changes.
+          compile
+        else
+          build_and_watch
+        end
+      elsif test?
+        compile
+      end
     end
 
     def build_and_watch
