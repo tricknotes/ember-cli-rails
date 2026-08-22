@@ -1,4 +1,4 @@
-main
+0.13.0.beta1
 ------
 
 * Support Ember applications generated with the Vite-based blueprint
