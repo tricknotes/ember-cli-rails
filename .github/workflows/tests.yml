@@ -16,13 +16,31 @@ jobs:
       matrix:
         ruby: ["3.3", "3.4", "4.0"]
         rails: ["7.2", "8.0", "8.1"]
+        # `ember` is the `ember-cli/ember-new-output` tag used for the
+        # dummy app. `>= 6.8` uses the Vite-based blueprint, older
+        # versions use the classic Broccoli-based build.
+        ember: ["7.0.0"]
         include:
-          - ruby: "4.0"
-            rails: "main"
+          # Disabled: rspec-rails 6.x (the newest the gemspec allows)
+          # fails to load specs against rails/rails main with
+          # `FrozenError: can't modify frozen Hash`. Re-enable once the
+          # rspec-rails dependency can be upgraded to a series that
+          # supports Rails main.
+          # - ruby: "4.0"
+          #   rails: "main"
+          #   ember: "7.0.0"
+          # Classic (Broccoli-based) blueprint coverage
+          - ruby: "3.4"
+            rails: "8.1"
+            ember: "5.12.0"
+          - ruby: "3.4"
+            rails: "8.1"
+            ember: "6.7.2"
 
     env:
       RAILS_ENV: "test"
       RAILS_VERSION: "${{ matrix.rails }}"
+      EMBER_VERSION: "${{ matrix.ember }}"
 
     steps:
     - uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
@@ -30,7 +48,7 @@ jobs:
     - name: "Install NodeJS"
       uses: "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020" # v7.0.0
       with:
-        node-version: "20.x"
+        node-version: "22.x"
 
     - name: "Install Ruby ${{ matrix.ruby }}"
       uses: "ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b" # v1.321.0

@@ -50,7 +50,14 @@ module EmberCli
     def build
       unless EmberCli.skip?
         if development?
-          build_and_watch
+          if paths.vite?
+            # The Vite-based blueprint (`ember-cli >= 6.8`) has no
+            # `ember-cli-rails-addon` to manage the build lock, so build
+            # synchronously instead of watching for changes.
+            compile
+          else
+            build_and_watch
+          end
         elsif test?
           compile
         end

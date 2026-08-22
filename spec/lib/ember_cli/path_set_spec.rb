@@ -155,6 +155,30 @@ describe EmberCli::PathSet do
     end
   end
 
+  describe "#vite?" do
+    it "is false when the app has no Vite config" do
+      path_set = build_path_set
+
+      expect(path_set).not_to be_vite
+    end
+
+    it "is true when the app has a vite.config.mjs" do
+      app = build_app
+      create_file(app_root_for(app).join("vite.config.mjs"))
+      path_set = build_path_set(app: app)
+
+      expect(path_set).to be_vite
+    end
+
+    it "is true when the app has a vite.config.js" do
+      app = build_app
+      create_file(app_root_for(app).join("vite.config.js"))
+      path_set = build_path_set(app: app)
+
+      expect(path_set).to be_vite
+    end
+  end
+
   describe "#bower_components" do
     it "is a child of #root" do
       app = build_app(name: "foo")

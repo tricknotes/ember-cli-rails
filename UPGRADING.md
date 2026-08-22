@@ -1,3 +1,29 @@
+# EmberCLI support
+
+`ember-cli >= 6.8` generates applications that are built with [Vite] instead
+of the classic Broccoli-based pipeline. `ember-cli-rails` supports both build
+systems, and detects the Vite-based build by the presence of a `vite.config.*`
+file in the Ember application's root.
+
+When upgrading an Ember application to the Vite-based blueprint, note the
+following differences in how `ember-cli-rails` treats it:
+
+* Remove `ember-cli-rails-addon` from the application's `package.json`. The
+  addon is incompatible with the Vite-based build (it forces
+  `storeConfigInMeta` off and ships an initializer that imports the removed
+  `ember` module), and `ember-cli-rails` no longer needs it there.
+* Use `include_ember_script_tags` on its own instead of pairing it with
+  `include_ember_stylesheet_tags`: for Vite-based applications it emits the
+  configuration meta tag, the stylesheet links, and the module script tags
+  all together, while `include_ember_stylesheet_tags` supports only classic
+  applications. This requires `ember-cli-rails-assets >= 0.8.0`.
+* In development, the application is built synchronously on first request
+  instead of being rebuilt on file changes. Restart the Rails server to pick
+  up changes, or iterate with the Ember application's own development server
+  (`npm start`).
+
+[Vite]: https://vitejs.dev
+
 # Ruby support
 
 According to [these release notes][latest-eol], Ruby versions prior to `2.5.x`

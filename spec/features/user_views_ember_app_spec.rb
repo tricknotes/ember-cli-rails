@@ -36,27 +36,27 @@ feature "User views ember app", :js do
   end
 
   scenario "is redirected with trailing slash", js: false do
-    expect(embedded_path).to eq("/asset-helpers")
+    expect(include_index_path).to eq("/no-block")
 
-    visit embedded_path
+    visit include_index_path
 
-    expect(current_path).to eq("/asset-helpers/")
+    expect(current_path).to eq("/no-block/")
   end
 
   scenario "is redirected with trailing slash with query params", js: false do
-    expect(embedded_path(query: "foo")).to eq("/asset-helpers?query=foo")
+    expect(include_index_path(query: "foo")).to eq("/no-block?query=foo")
 
-    visit embedded_path(query: "foo")
+    visit include_index_path(query: "foo")
 
-    expect(page).to have_current_path("/asset-helpers/?query=foo")
+    expect(page).to have_current_path("/no-block/?query=foo")
   end
 
   scenario "is not redirected with trailing slash with params", js: false do
-    expect(embedded_path(query: "foo")).to eq("/asset-helpers?query=foo")
+    expect(include_index_path(query: "foo")).to eq("/no-block?query=foo")
 
-    visit "/asset-helpers/?query=foo"
+    visit "/no-block/?query=foo"
 
-    expect(page).to have_current_path("/asset-helpers/?query=foo")
+    expect(page).to have_current_path("/no-block/?query=foo")
   end
 
   def have_client_side_asset
