@@ -3,6 +3,8 @@ main
 
 * Support Ember applications generated with the Vite-based blueprint
   (`ember-cli >= 6.8`), without `ember-cli-rails-addon`
+* Require `ember-cli-rails-assets >= 0.8.0`, which adds Vite support to
+  `include_ember_script_tags`
 
 0.12.3
 ------

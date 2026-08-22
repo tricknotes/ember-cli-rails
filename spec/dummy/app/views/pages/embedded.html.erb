@@ -1,2 +1,6 @@
 <%= include_ember_script_tags "my-app" %>
-<%= include_ember_stylesheet_tags "my-app" %>
+<%# For Vite-based apps, `include_ember_script_tags` already emits the
+    stylesheet tags, and `include_ember_stylesheet_tags` is classic-only. %>
+<% unless EmberCli["my-app"].paths.vite? %>
+  <%= include_ember_stylesheet_tags "my-app" %>
+<% end %>

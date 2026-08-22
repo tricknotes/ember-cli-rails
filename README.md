@@ -465,11 +465,12 @@ actively supported method of serving EmberCLI applications.
 However, for the sake of backwards compatibility, `ember-cli-rails` supports
 injecting the EmberCLI-generated assets into an existing Rails layout.
 
-**Note:** these helpers are only supported for classic (Broccoli-based)
-applications. Vite-based applications (generated with `ember-cli >= 6.8`) load
-their configuration from a `<meta>` tag in the generated `index.html` and use
-ES module script tags, which these helpers cannot inject. Use
-`render_ember_app` instead.
+**Note:** for Vite-based applications (generated with `ember-cli >= 6.8`),
+use `include_ember_script_tags` on its own. It emits everything the
+application needs to boot — the configuration `<meta>` tag, the stylesheet
+and `modulepreload` links, and the ES module script tags — extracted from
+the generated `index.html`. `include_ember_stylesheet_tags` only supports
+classic (Broccoli-based) applications.
 
 Following the example above, configure the mounted EmberCLI application to be
 served by a custom controller (`ApplicationController`, in this case).
@@ -685,8 +686,9 @@ The test suite currently exercises the `5.12.x` and `6.7.x` (classic) and
 
 Note the following limitations for Vite-based applications:
 
-* `include_ember_script_tags` and `include_ember_stylesheet_tags` are not
-  supported — use `render_ember_app` instead
+* `include_ember_script_tags` emits the full set of tags the application
+  needs to boot, stylesheets included; `include_ember_stylesheet_tags` is
+  classic-only and must not be called for Vite-based applications
 * in development, the application is built synchronously on first request
   instead of being rebuilt on file changes
 

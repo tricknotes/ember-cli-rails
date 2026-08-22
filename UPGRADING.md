@@ -12,8 +12,11 @@ following differences in how `ember-cli-rails` treats it:
   addon is incompatible with the Vite-based build (it forces
   `storeConfigInMeta` off and ships an initializer that imports the removed
   `ember` module), and `ember-cli-rails` no longer needs it there.
-* `include_ember_script_tags` and `include_ember_stylesheet_tags` are not
-  supported for Vite-based applications. Use `render_ember_app` instead.
+* Use `include_ember_script_tags` on its own instead of pairing it with
+  `include_ember_stylesheet_tags`: for Vite-based applications it emits the
+  configuration meta tag, the stylesheet links, and the module script tags
+  all together, while `include_ember_stylesheet_tags` supports only classic
+  applications. This requires `ember-cli-rails-assets >= 0.8.0`.
 * In development, the application is built synchronously on first request
   instead of being rebuilt on file changes. Restart the Rails server to pick
   up changes, or iterate with the Ember application's own development server

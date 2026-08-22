@@ -9,10 +9,6 @@ feature "User views ember app", :js do
 
   context "using custom controller" do
     scenario "rendering with asset helpers" do
-      if vite_app?
-        skip "include_ember_script_tags is not supported for Vite-based apps"
-      end
-
       visit embedded_path
 
       expect(page).to have_client_side_asset
@@ -61,10 +57,6 @@ feature "User views ember app", :js do
     visit "/no-block/?query=foo"
 
     expect(page).to have_current_path("/no-block/?query=foo")
-  end
-
-  def vite_app?
-    EmberCli["my-app"].paths.vite?
   end
 
   def have_client_side_asset
