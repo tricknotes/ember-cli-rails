@@ -21,9 +21,14 @@ jobs:
         # versions use the classic Broccoli-based build.
         ember: ["7.0.0"]
         include:
-          - ruby: "4.0"
-            rails: "main"
-            ember: "7.0.0"
+          # Disabled: rspec-rails 6.x (the newest the gemspec allows)
+          # fails to load specs against rails/rails main with
+          # `FrozenError: can't modify frozen Hash`. Re-enable once the
+          # rspec-rails dependency can be upgraded to a series that
+          # supports Rails main.
+          # - ruby: "4.0"
+          #   rails: "main"
+          #   ember: "7.0.0"
           # Classic (Broccoli-based) blueprint coverage
           - ruby: "3.4"
             rails: "8.1"
