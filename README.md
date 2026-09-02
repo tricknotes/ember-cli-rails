@@ -523,11 +523,18 @@ and `modulepreload` links, and the ES module script tags — extracted from
 the generated `index.html`. `include_ember_stylesheet_tags` only supports
 classic (Broccoli-based) applications.
 
-The asset helpers always read the output of `ember build`, so they do not use
-[Vite's development server](#vite-based-applications). To serve a Vite-based
-application from it, render the application with `render_ember_app`. Otherwise,
-disable the development server with `dev_server: false` so that the assets the
-helpers refer to are built.
+When the application is served by [Vite's development
+server](#vite-based-applications), `include_ember_script_tags` (from
+[ember-cli-rails-assets]) reads `index.html` from the server and emits the
+startup tags with absolute URLs pointing at it — nothing is built, and changes
+to the application are picked up by reloading the page. This needs the
+ember-cli-rails-assets release carrying
+[tricknotes/ember-cli-rails-assets#35][assets-dev-server]; with older
+releases, disable the development server with `dev_server: false` so that the
+assets the helpers refer to are built (the build is then rerun on the next
+request after the application's source files change).
+
+[assets-dev-server]: https://github.com/tricknotes/ember-cli-rails-assets/pull/35
 
 Following the example above, configure the mounted EmberCLI application to be
 served by a custom controller (`ApplicationController`, in this case).
@@ -753,8 +760,10 @@ Note the following limitations for Vite-based applications:
   classic-only and must not be called for Vite-based applications
 * in development, the application is served by [Vite's development
   server](#vite-based-applications) rather than out of a build directory. The
-  asset helpers read that build directory, so they require the development
-  server to be disabled with `dev_server: false`
+  asset helpers serve their tags from the development server too (with the
+  ember-cli-rails-assets release carrying [tricknotes/ember-cli-rails-assets#35][assets-dev-server]);
+  with older releases they require the development server to be disabled with
+  `dev_server: false`
 
 ## Ruby and Rails support
 
