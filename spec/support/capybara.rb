@@ -11,6 +11,9 @@ Capybara.register_driver :headless_chrome do |app|
     options.binary = ENV["CHROME_BIN"]
   end
 
+  # Capture the browser console so that failing examples can dump it.
+  options.add_option("goog:loggingPrefs", { browser: "ALL" })
+
   Capybara::Selenium::Driver.new(
     app,
     browser: :chrome,

@@ -8,6 +8,24 @@ feature "User views ember app served by its development server", :js do
     Capybara.using_wait_time(60) { example.run }
   end
 
+  # These examples fail intermittently on CI with an empty page body. Dump
+  # what the browser saw, so that a failing run explains why the application
+  # did not boot.
+  after do |example|
+    next unless example.exception
+
+    begin
+      warn "Document for #{example.description.inspect}:"
+      warn page.html.to_s[0, 4_000]
+      warn "Browser console:"
+      page.driver.browser.logs.get(:browser).each do |entry|
+        warn "  #{entry.level} #{entry.message}"
+      end
+    rescue StandardError => error
+      warn "Failed to dump the browser state: #{error.class}: #{error.message}"
+    end
+  end
+
   scenario "the application boots from the development server" do
     visit dev_server_app_path
 
