@@ -11,6 +11,10 @@ jobs:
   build:
     runs-on: "ubuntu-latest"
 
+    # Jobs normally finish in about 3 minutes; a hung job once ran for
+    # 2 hours until it was cancelled by hand, so cap the runtime.
+    timeout-minutes: 15
+
     strategy:
       fail-fast: false
       matrix:
