@@ -9,11 +9,16 @@ on:
 
 jobs:
   build:
+    # Named explicitly so that `experimental` stays out of the job name.
+    name: "build (${{ matrix.ruby }}, ${{ matrix.rails }}, ${{ matrix.ember }})"
     runs-on: "ubuntu-latest"
 
     # Jobs normally finish in about 3 minutes; a hung job once ran for
     # 2 hours until it was cancelled by hand, so cap the runtime.
     timeout-minutes: 15
+
+    # Rails main is a moving target, so let it break without failing the build.
+    continue-on-error: ${{ matrix.experimental || false }}
 
     strategy:
       fail-fast: false
@@ -25,14 +30,10 @@ jobs:
         # versions use the classic Broccoli-based build.
         ember: ["7.0.0"]
         include:
-          # Disabled: rspec-rails 6.x (the newest the gemspec allows)
-          # fails to load specs against rails/rails main with
-          # `FrozenError: can't modify frozen Hash`. Re-enable once the
-          # rspec-rails dependency can be upgraded to a series that
-          # supports Rails main.
-          # - ruby: "4.0"
-          #   rails: "main"
-          #   ember: "7.0.0"
+          - ruby: "4.0"
+            rails: "main"
+            ember: "7.0.0"
+            experimental: true
           # Classic (Broccoli-based) blueprint coverage
           - ruby: "3.4"
             rails: "8.1"
