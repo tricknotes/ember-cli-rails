@@ -32,6 +32,6 @@ describe "Request an asset from an app served by its development server" do
   end
 
   def logo_size
-    Rails.root.join("my-app", "public", "assets", "logo.png").size
+    Rails.root.join("my-app-dev-server", "public", "assets", "logo.png").size
   end
 end
