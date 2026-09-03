@@ -9,7 +9,8 @@ bundle check || bundle install
 # Add binstubs to PATH via export PATH=".git/safe/../../bin:$PATH" in ~/.zshenv
 mkdir -p .git/safe
 
+# `bin/setup_ember` installs the Ember applications' dependencies itself
+# (and copies the installed app for the development server), so there is no
+# `rake ember:install` here: re-running npm for every registered app doubled
+# the exposure to a slow registry.
 bin/setup_ember spec/dummy/my-app
-
-echo '-- Install Ember dependencies'
-cd spec/dummy && bundle exec rake ember:install || true
