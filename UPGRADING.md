@@ -24,13 +24,22 @@ following differences in how `ember-cli-rails` treats it:
   the application's modules, and Vite's HMR client, from it directly. Changes
   are hot-reloaded without restarting Rails.
 
-  Configure it, or opt out of it, with the `dev_server` option:
+  The development server is the default — and the recommended — way to
+  develop a Vite-based application, and needs no configuration. When
+  configuring it anyway, a fixed `port` lets several Rails workers (or a
+  hand-started `npm start`) share a single server, and a longer `timeout`
+  accommodates a slow first boot:
 
   ```rb
   EmberCli.configure do |c|
-    # listen on a fixed port instead of an available one
-    c.app :frontend, dev_server: { port: 4200 }
+    c.app :frontend, dev_server: { port: 4200, timeout: 120 }
+  end
+  ```
 
+  To opt out of the development server, disable it:
+
+  ```rb
+  EmberCli.configure do |c|
     # build once, synchronously, on the first request instead
     c.app :admin, dev_server: false
   end
