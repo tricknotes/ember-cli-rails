@@ -1,11 +1,11 @@
 feature "User views ember app served by its development server", :js do
   before { skip_without_vite_blueprint }
 
-  # A cold development server transforms the application's modules on the
-  # first load, which can take longer than Capybara's default wait time on a
-  # busy CI runner.
+  # A cold development server runs the embroider prebuild and transforms the
+  # application's modules on the first load, which can take well over
+  # Capybara's default wait time on a busy CI runner.
   around do |example|
-    Capybara.using_wait_time(30) { example.run }
+    Capybara.using_wait_time(60) { example.run }
   end
 
   scenario "the application boots from the development server" do
