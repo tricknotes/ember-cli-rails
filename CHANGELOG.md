@@ -5,6 +5,9 @@ main
   `development`, so that changes are hot-reloaded instead of requiring a
   restart. Configure it with the `dev_server` option, or opt out with
   `dev_server: false`
+* Require `ember-cli-rails-assets >= 0.9.0`, which serves the
+  `include_ember_script_tags` startup tags from Vite's development server
+  when the application is served from it
 
 0.13.0.beta1
 ------

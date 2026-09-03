@@ -527,14 +527,12 @@ When the application is served by [Vite's development
 server](#vite-based-applications), `include_ember_script_tags` (from
 [ember-cli-rails-assets]) reads `index.html` from the server and emits the
 startup tags with absolute URLs pointing at it — nothing is built, and changes
-to the application are picked up by reloading the page. This needs the
-ember-cli-rails-assets release carrying
-[tricknotes/ember-cli-rails-assets#35][assets-dev-server]; with older
-releases, disable the development server with `dev_server: false` so that the
-assets the helpers refer to are built (the build is then rerun on the next
-request after the application's source files change).
+to the application are picked up by reloading the page.
 
-[assets-dev-server]: https://github.com/tricknotes/ember-cli-rails-assets/pull/35
+With the development server disabled (`dev_server: false`), the helpers read
+the output of `ember build` instead: the application is built once,
+synchronously, on the first request, and changes to it are only picked up by
+restarting the Rails server.
 
 Following the example above, configure the mounted EmberCLI application to be
 served by a custom controller (`ApplicationController`, in this case).
@@ -760,10 +758,9 @@ Note the following limitations for Vite-based applications:
   classic-only and must not be called for Vite-based applications
 * in development, the application is served by [Vite's development
   server](#vite-based-applications) rather than out of a build directory. The
-  asset helpers serve their tags from the development server too (with the
-  ember-cli-rails-assets release carrying [tricknotes/ember-cli-rails-assets#35][assets-dev-server]);
-  with older releases they require the development server to be disabled with
-  `dev_server: false`
+  asset helpers serve their tags from the development server too; with
+  `dev_server: false` they read the build output, which is built once,
+  synchronously, on the first request
 
 ## Ruby and Rails support
 
