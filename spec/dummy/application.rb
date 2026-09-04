@@ -33,7 +33,9 @@ module Dummy
     config.secret_token = "SECRET_TOKEN_IS_MIN_30_CHARS_LONG"
     config.secret_key_base = "SECRET_KEY_BASE"
 
-    config.active_support.to_time_preserves_timezone = :zone
+    if Rails.gem_version < Gem::Version.new("8.1")
+      config.active_support.to_time_preserves_timezone = :zone
+    end
 
     def require_environment!
       initialize!
