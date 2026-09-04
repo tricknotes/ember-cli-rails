@@ -40,6 +40,9 @@ following differences in how `ember-cli-rails` treats it:
   development server to every interface and name the browser-facing origin
   separately: `dev_server: { host: "0.0.0.0", port: 4200, origin:
   "http://localhost:4200" }`.
+  Opening the page on a LAN IP or a custom domain also needs `server.cors`
+  configured in `vite.config.*` — Vite's default allows localhost origins
+  only.
 
   To opt out of the development server, disable it:
 
