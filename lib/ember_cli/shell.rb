@@ -81,7 +81,7 @@ module EmberCli
     end
 
     def test
-      run! ember.test
+      run ember.test
     end
 
     private
