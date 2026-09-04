@@ -218,6 +218,26 @@ If something is already listening on the configured `host` and `port`,
 possible to run `npm start` yourself, on a port the initializer names, and have
 Rails serve the application from it.
 
+`host` is both the address the development server binds to and — together with
+`port` — the origin the browser loads the application's modules from. When the
+two differ, configure the browser-facing origin separately with `origin`. The
+typical case is Rails running in a container: the development server must bind
+to `0.0.0.0` to be reachable through the container's published port, but
+browsers refuse to connect to `http://0.0.0.0`:
+
+```rb
+EmberCli.configure do |c|
+  c.app :frontend, dev_server: {
+    host: "0.0.0.0",
+    port: 4200,
+    origin: "http://localhost:4200",
+  }
+end
+```
+
+With `host: "0.0.0.0"`, Rails itself reaches the development server through the
+loopback interface.
+
 The development server's output is written to
 `log/ember-<app>.<environment>.log`.
 

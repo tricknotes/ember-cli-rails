@@ -37,8 +37,13 @@ module EmberCli
       @timeout ||= option(:timeout) { DEFAULT_TIMEOUT }.to_f
     end
 
+    # The origin the browser loads the application's assets from. It defaults
+    # to the address the development server binds to, but can be configured
+    # separately for setups where the two differ — a development server bound
+    # to `0.0.0.0` inside a container, reached by the browser through a
+    # published port, for instance.
     def origin
-      "http://#{host}:#{port}"
+      @origin ||= option(:origin) { "http://#{host}:#{port}" }.to_s.chomp("/")
     end
 
     # Boots the development server unless something is already listening on
@@ -96,7 +101,7 @@ module EmberCli
     def request(request_class, path, headers)
       start
 
-      uri = URI.join(origin, path)
+      uri = URI.join("http://#{connect_host}:#{port}", path)
       # Pass `nil` as the proxy address so that a `http_proxy` environment
       # variable never routes requests for the local server through a proxy.
       Net::HTTP.start(uri.hostname, uri.port, nil, read_timeout: timeout) do |http|
@@ -112,8 +117,19 @@ module EmberCli
       MSG
     end
 
+    # The address Rails connects to the development server on. `0.0.0.0` asks
+    # the server to listen on every interface, but is not an address to
+    # connect to, so requests go to the loopback interface instead.
+    def connect_host
+      if host == "0.0.0.0"
+        "127.0.0.1"
+      else
+        host
+      end
+    end
+
     def listening?
-      Socket.tcp(host, port, connect_timeout: CONNECT_TIMEOUT, &:close)
+      Socket.tcp(connect_host, port, connect_timeout: CONNECT_TIMEOUT, &:close)
 
       true
     rescue SystemCallError, IOError

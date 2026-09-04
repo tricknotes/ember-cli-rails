@@ -36,6 +36,11 @@ following differences in how `ember-cli-rails` treats it:
   end
   ```
 
+  When Rails runs in a container and the browser outside of it, bind the
+  development server to every interface and name the browser-facing origin
+  separately: `dev_server: { host: "0.0.0.0", port: 4200, origin:
+  "http://localhost:4200" }`.
+
   To opt out of the development server, disable it:
 
   ```rb
