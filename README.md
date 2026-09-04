@@ -142,6 +142,7 @@ end
   For instance, mounting `mount_ember_app :frontend, to: "/frontend"` will handle a
   `format: :html` request to `/frontend/posts`.
   *Note:* If you specify a custom path, you must also update the `rootURL` in `frontend/config/environment.js`. See [Mounting multiple Ember applications](#mounting-multiple-ember-applications) for more information.
+  *Note:* Requests without `Accept: text/html` — `curl`'s default, most health checkers — skip this route and receive the raw `index.html` from the asset handler.
 * `controller` - Defaults to `"ember_cli/ember"`
 * `action` - Defaults to `"index"`
 
@@ -195,6 +196,8 @@ Rails still renders the application's `index.html`, but reads it from the
 development server rather than from disk. The root-relative URLs in that
 document are rewritten to point at the development server, so the browser
 loads the application's modules — and Vite's HMR client — from it directly.
+The rewriting covers every tag the server emits: Vite externalizes even the
+document's inline bootstrapping script.
 Changes to the Ember application are hot-reloaded without reloading the page,
 and without restarting Rails.
 
@@ -237,6 +240,11 @@ end
 
 With `host: "0.0.0.0"`, Rails itself reaches the development server through the
 loopback interface.
+
+Vite's default CORS setting allows localhost origins only: to open the page on
+a LAN IP or a custom domain, configure
+[`server.cors`](https://vite.dev/config/server-options#server-cors) in
+`vite.config.*`.
 
 The development server's output is written to
 `log/ember-<app>.<environment>.log`.
@@ -468,6 +476,9 @@ helper in your view:
 
 The `body` block argument and the corresponding call to `body.append` in the
 example are both optional, and can be omitted.
+
+`render_ember_app` emits a complete HTML document, so render it with the
+layout disabled (see below).
 
 ### Serving Rails-generated CSS
 
