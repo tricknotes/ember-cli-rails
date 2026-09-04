@@ -1,4 +1,4 @@
-main
+0.13.0
 ------
 
 * Serve Vite-based applications from Vite's development server in
