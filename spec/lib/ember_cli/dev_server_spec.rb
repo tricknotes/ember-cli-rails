@@ -237,6 +237,7 @@ describe EmberCli::DevServer do
       end
 
       @thread = Thread.new { @server.start }
+      wait_until_running
 
       @port
     end
@@ -244,6 +245,25 @@ describe EmberCli::DevServer do
     def shutdown
       @server&.shutdown
       @thread&.join
+    end
+
+    private
+
+    # Not `shutdown` straight after `Thread.new`: `GenericServer#shutdown` is
+    # a no-op until `#start` has set up its shutdown pipe, and a new thread
+    # is not guaranteed to have run by the time the example finishes (on
+    # Ruby 4.0 it usually has not). Shutting down such a server leaves it
+    # looping forever, and the join in `#shutdown` never returns.
+    def wait_until_running
+      deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 5
+
+      until @server.status == :Running
+        if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+          raise "The stub development server did not start within 5 seconds"
+        end
+
+        sleep 0.01
+      end
     end
   end
 
