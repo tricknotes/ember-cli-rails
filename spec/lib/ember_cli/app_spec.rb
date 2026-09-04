@@ -91,7 +91,10 @@ describe EmberCli::App do
 
   describe "#test" do
     it "exits with exit status of 0" do
-      passed = EmberCli["my-app"].test
+      # `ember test` occasionally hangs on CI when testem fails to attach to
+      # its browser; fail with a clear message instead of eating the job's
+      # runtime cap.
+      passed = Timeout.timeout(300) { EmberCli["my-app"].test }
 
       expect(passed).to be true
     end
