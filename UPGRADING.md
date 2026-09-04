@@ -16,7 +16,7 @@ following differences in how `ember-cli-rails` treats it:
   `include_ember_stylesheet_tags`: for Vite-based applications it emits the
   configuration meta tag, the stylesheet links, and the module script tags
   all together, while `include_ember_stylesheet_tags` supports only classic
-  applications. This requires `ember-cli-rails-assets >= 0.8.0`.
+  applications. This requires `ember-cli-rails-assets >= 0.9.0`.
 * In development, the application is served by Vite's development server —
   the same one the application's `npm start` script runs. `ember-cli-rails`
   starts it on the first request and shuts it down when Rails exits, and
@@ -24,22 +24,32 @@ following differences in how `ember-cli-rails` treats it:
   the application's modules, and Vite's HMR client, from it directly. Changes
   are hot-reloaded without restarting Rails.
 
-  Configure it, or opt out of it, with the `dev_server` option:
+  The development server is the default — and the recommended — way to
+  develop a Vite-based application, and needs no configuration. When
+  configuring it anyway, a fixed `port` lets several Rails workers (or a
+  hand-started `npm start`) share a single server, and a longer `timeout`
+  accommodates a slow first boot:
 
   ```rb
   EmberCli.configure do |c|
-    # listen on a fixed port instead of an available one
-    c.app :frontend, dev_server: { port: 4200 }
+    c.app :frontend, dev_server: { port: 4200, timeout: 120 }
+  end
+  ```
 
+  To opt out of the development server, disable it:
+
+  ```rb
+  EmberCli.configure do |c|
     # build once, synchronously, on the first request instead
     c.app :admin, dev_server: false
   end
   ```
 
-* `include_ember_script_tags` reads the output of `ember build`, which the
-  development server does not produce. Render Vite-based applications with
-  `render_ember_app`, or disable the development server with
-  `dev_server: false` to keep using the asset helpers.
+* `include_ember_script_tags` serves its startup tags from the development
+  server, with absolute URLs pointing at it — nothing is built, and changes
+  are picked up by reloading the page. With `dev_server: false` it reads the
+  output of `ember build` instead, built once, synchronously, on the first
+  request; restart the Rails server to pick up changes.
 
 [Vite]: https://vitejs.dev
 
