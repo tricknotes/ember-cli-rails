@@ -12,7 +12,7 @@ describe EmberCli::Runner do
         )
 
         expect { runner.run!(command_with_error(out: "out")) }.
-          to raise_error(SystemExit)
+          to raise_error(EmberCli::BuildError, /failed with status 1/)
 
         expect(split_output_from_stream(stdout)).to eq(%w[out out])
         expect(split_output_from_stream(logfile)).to eq(%w[out out])
@@ -27,7 +27,7 @@ describe EmberCli::Runner do
         )
 
         expect { runner.run!(command_with_error(err: "err")) }.
-          to raise_error(SystemExit)
+          to raise_error(EmberCli::BuildError, /failed with status 1/)
 
         expect(split_output_from_stream(stderr)).to eq(%w[err err])
         expect(split_output_from_stream(logfile)).to eq(%w[err err])
