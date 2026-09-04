@@ -31,12 +31,12 @@ setup_ember() {
       # `ember-cli-rails-addon` is incompatible with the Vite-based
       # blueprint, and `ember-cli-rails` does not require it there.
       echo '-- Install NPM dependencies'
-      cd $target &&
-        npm install
+      (cd $target &&
+        npm install)
     else
       echo '-- Install ember-cli-rails-addon'
-      cd $target &&
-        npm install --save-dev ember-cli-rails-addon@rondale-sc/ember-cli-rails-addon
+      (cd $target &&
+        npm install --save-dev ember-cli-rails-addon@rondale-sc/ember-cli-rails-addon)
     fi
 
     if [ -f "bower.json" ]; then
@@ -49,4 +49,20 @@ setup_ember() {
   fi
 }
 
+# The dummy application registers the development server against its own copy
+# of the app: sharing one directory with the `ember build` and `ember test`
+# runs lets their prebuild and cache output leak into the running server (it
+# then serves the test-environment config, whose `autoboot: false` leaves the
+# page blank).
+copy_for_dev_server() {
+  local source="spec/dummy/my-app"
+  local target="spec/dummy/my-app-dev-server"
+
+  if [ -d "$source" ] && [ -f "$source/vite.config.mjs" ] && ! [ -d "$target" ]; then
+    echo '-- Copy the app for the development server'
+    cp -a "$source" "$target"
+  fi
+}
+
 setup_ember
+copy_for_dev_server

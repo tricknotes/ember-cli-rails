@@ -81,6 +81,10 @@ c.app :frontend, path: "~/projects/my-ember-app"
 
 - `yarn` - enables the [yarn](https://github.com/yarnpkg/yarn) package manager when installing dependencies
 
+- `dev_server` - configures [Vite's development server](#vite-based-applications)
+  for Vite-based applications in `development`. Pass `false` to opt out of it,
+  or a Hash of `host`, `port`, and `timeout` settings.
+
 ```ruby
 EmberCli.configure do |c|
   c.app :adminpanel # path defaults to `Rails.root.join("adminpanel")`
@@ -176,16 +180,63 @@ suites, configure the `default` task to depend on both `spec` and `ember:test`.
 task default: [:spec, "ember:test"]
 ```
 
-**Vite-based applications**
+### Vite-based applications
 
 When Rails is running in development mode, classic (Broccoli-based) Ember
 applications are built with `ember build --watch`, so changes to the Ember
 application are picked up automatically.
 
-Vite-based Ember applications (generated with `ember-cli >= 6.8`) are instead
-built once, synchronously, when they are first requested. To pick up changes
-to the Ember application, restart the Rails server, or iterate on the Ember
-application directly with its own development server (`npm start`).
+Vite-based Ember applications (generated with `ember-cli >= 6.8`) are served by
+Vite's own development server instead — the same one the application's
+`npm start` script runs. `ember-cli-rails` starts it on the first request,
+waits for it to accept connections, and shuts it down when Rails exits.
+
+Rails still renders the application's `index.html`, but reads it from the
+development server rather than from disk. The root-relative URLs in that
+document are rewritten to point at the development server, so the browser
+loads the application's modules — and Vite's HMR client — from it directly.
+Changes to the Ember application are hot-reloaded without reloading the page,
+and without restarting Rails.
+
+Assets that the Ember application references relatively (an `<img>` in a
+template, for instance) are still requested from Rails, which proxies them to
+the development server.
+
+**Configuring the development server**
+
+By default the development server listens on an available port on `127.0.0.1`,
+and `ember-cli-rails` waits up to 30 seconds for it to start:
+
+```rb
+EmberCli.configure do |c|
+  c.app :frontend, dev_server: { host: "127.0.0.1", port: 4200, timeout: 60 }
+end
+```
+
+If something is already listening on the configured `host` and `port`,
+`ember-cli-rails` uses it instead of starting a second server. That makes it
+possible to run `npm start` yourself, on a port the initializer names, and have
+Rails serve the application from it.
+
+The development server's output is written to
+`log/ember-<app>.<environment>.log`.
+
+**Opting out**
+
+To build the application once, synchronously, on the first request instead of
+running a development server, disable it:
+
+```rb
+EmberCli.configure do |c|
+  c.app :frontend, dev_server: false
+end
+```
+
+Changes to the Ember application are then only picked up by restarting the
+Rails server.
+
+The development server is only used in `development`. `test` and `production`
+are served from the output of `ember build`, as they always have been.
 
 ## Deploy
 
@@ -472,6 +523,12 @@ and `modulepreload` links, and the ES module script tags — extracted from
 the generated `index.html`. `include_ember_stylesheet_tags` only supports
 classic (Broccoli-based) applications.
 
+The asset helpers always read the output of `ember build`, so they do not use
+[Vite's development server](#vite-based-applications). To serve a Vite-based
+application from it, render the application with `render_ember_app`. Otherwise,
+disable the development server with `dev_server: false` so that the assets the
+helpers refer to are built.
+
 Following the example above, configure the mounted EmberCLI application to be
 served by a custom controller (`ApplicationController`, in this case).
 
@@ -627,6 +684,11 @@ make sure it's configured to run a single worker process.
 Without restricting the server to a single process, [it is possible for multiple
 EmberCLI runners to clobber each others' work][#94].
 
+This does not apply to Vite-based applications served by [Vite's development
+server](#vite-based-applications): nothing is written to a shared build
+directory. Give the application a fixed `port` so that the workers share a
+single development server rather than starting one each.
+
 [Puma]: https://github.com/puma/puma
 [Unicorn]: https://rubygems.org/gems/unicorn
 [#94]: https://github.com/tricknotes/ember-cli-rails/issues/94#issuecomment-77627453
@@ -689,8 +751,10 @@ Note the following limitations for Vite-based applications:
 * `include_ember_script_tags` emits the full set of tags the application
   needs to boot, stylesheets included; `include_ember_stylesheet_tags` is
   classic-only and must not be called for Vite-based applications
-* in development, the application is built synchronously on first request
-  instead of being rebuilt on file changes
+* in development, the application is served by [Vite's development
+  server](#vite-based-applications) rather than out of a build directory. The
+  asset helpers read that build directory, so they require the development
+  server to be disabled with `dev_server: false`
 
 ## Ruby and Rails support
 

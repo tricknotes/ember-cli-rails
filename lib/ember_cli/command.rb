@@ -17,6 +17,20 @@ module EmberCli
       ember_build(watch: watch)
     end
 
+    # Boots Vite's development server for an application generated with the
+    # Vite-based blueprint (`ember-cli >= 6.8`). This is what the blueprint's
+    # own `npm start` script runs.
+    def dev_server(host:, port:)
+      line = Terrapin::CommandLine.new(paths.vite, [
+        "--host :host",
+        "--port :port",
+        "--strictPort",
+        "--clearScreen false",
+      ].join(" "))
+
+      line.command(host: host.to_s, port: port.to_s)
+    end
+
     private
 
     attr_reader :options, :paths

@@ -64,6 +64,24 @@ module EmberCli
       end
     end
 
+    def vite
+      @vite ||= begin
+        root.join("node_modules", ".bin", "vite").tap do |path|
+          unless path.executable?
+            fail DependencyError.new <<-MSG.strip_heredoc
+              No `vite` executable found for `#{app_name}`.
+
+              Install it:
+
+                  $ cd #{root}
+                  $ #{package_manager} install
+
+            MSG
+          end
+        end
+      end
+    end
+
     def lockfile
       @lockfile ||= tmp.join("build.lock")
     end
