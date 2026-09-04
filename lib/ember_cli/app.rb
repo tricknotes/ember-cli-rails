@@ -63,11 +63,11 @@ module EmberCli
       end
     end
 
-    def index_html(head:, body:)
+    def index_html(head:, body:, mount_point: nil)
       html = HtmlPage::Renderer.new(
         head: head,
         body: body,
-        content: deploy.index_html,
+        content: remap_to_mount_point(deploy.index_html, mount_point),
       )
 
       html.render
@@ -129,6 +129,25 @@ module EmberCli
 
     def test?
       env.to_s == "test"
+    end
+
+    # The `index.html` of a Vite build refers to its assets with root-relative
+    # URLs. When the application is mounted somewhere other than `/`, remap
+    # them onto the mount point, where `mount_ember_assets` serves them.
+    # References that already carry the mount point — a `rootURL` configured
+    # to match it — are left alone.
+    def remap_to_mount_point(html, mount_point)
+      prefix = mount_point.to_s.chomp("/")
+
+      if prefix.empty? || !paths.vite?
+        return html
+      end
+
+      already_mounted = Regexp.escape(prefix.delete_prefix("/"))
+
+      html.gsub(%r{(\s)(src|href)=(["'])/(?!/)(?!#{already_mounted}/)}i) do
+        "#{$1}#{$2}=#{$3}#{prefix}/"
+      end
     end
 
     def deploy

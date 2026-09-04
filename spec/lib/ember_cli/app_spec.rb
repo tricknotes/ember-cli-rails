@@ -100,6 +100,50 @@ describe EmberCli::App do
     end
   end
 
+  describe "#index_html" do
+    it "remaps a Vite build's root-relative URLs onto the mount point" do
+      app = build_app("frontend", vite: true, environment: "test")
+      stub_deployed_index_html(app, <<~HTML)
+        <html><head>
+        <script type="module" src="/@embroider/virtual/vendor.js"></script>
+        <link rel="stylesheet" href="/assets/app.css">
+        <script type="module" src="https://cdn.example.com/analytics.js"></script>
+        <script src="//cdn.example.com/protocol-relative.js"></script>
+        <link rel="stylesheet" href="/admin/already-mounted.css">
+        </head><body></body></html>
+      HTML
+
+      index_html = app.index_html(head: "", body: "", mount_point: "/admin")
+
+      expect(index_html).to include(%{src="/admin/@embroider/virtual/vendor.js"})
+      expect(index_html).to include(%{href="/admin/assets/app.css"})
+      expect(index_html).to include(%{src="https://cdn.example.com/analytics.js"})
+      expect(index_html).to include(%{src="//cdn.example.com/protocol-relative.js"})
+      expect(index_html).to include(%{href="/admin/already-mounted.css"})
+      expect(index_html).not_to include(%{/admin/admin/})
+    end
+
+    it "leaves the document alone when mounted at the root" do
+      app = build_app("frontend", vite: true, environment: "test")
+      content = %{<html><head><script src="/assets/app.js"></script></head><body></body></html>}
+      stub_deployed_index_html(app, content)
+
+      index_html = app.index_html(head: "", body: "", mount_point: "/")
+
+      expect(index_html).to include(%{src="/assets/app.js"})
+    end
+
+    it "leaves a classic build alone" do
+      app = build_app("frontend", vite: false, environment: "test")
+      content = %{<html><head><script src="/assets/app.js"></script></head><body></body></html>}
+      stub_deployed_index_html(app, content)
+
+      index_html = app.index_html(head: "", body: "", mount_point: "/admin")
+
+      expect(index_html).to include(%{src="/assets/app.js"})
+    end
+  end
+
   describe "#root_path" do
     it "delegates to PathSet" do
       root_path = Pathname.new(".")
@@ -195,6 +239,10 @@ describe EmberCli::App do
     allow_any_instance_of(EmberCli::PathSet).to receive(:vite?).and_return(vite)
 
     EmberCli::App.new(name, **options)
+  end
+
+  def stub_deployed_index_html(app, html)
+    allow(app).to receive(:deploy).and_return(double(index_html: html))
   end
 
   def stub_paths(method_to_value)
