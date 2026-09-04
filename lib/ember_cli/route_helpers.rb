@@ -6,7 +6,7 @@ module ActionDispatch
     class Mapper
       def mount_ember_app(app_name, to:, **options)
         routing_options = options.deep_merge(
-          defaults: { ember_app: app_name },
+          defaults: { ember_app: app_name, ember_mount_point: to },
         )
 
         routing_options.reverse_merge!(

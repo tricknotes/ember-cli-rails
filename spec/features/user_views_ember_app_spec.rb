@@ -35,6 +35,17 @@ feature "User views ember app", :js do
     end
   end
 
+  scenario "remaps the document's asset URLs onto the mount point", js: false do
+    unless EmberCli["my-app"].paths.vite?
+      skip "Root-relative asset URLs are only remapped for Vite builds"
+    end
+
+    visit include_index_path
+
+    expect(page).to have_css(%{script[src^="/no-block/"]}, visible: false)
+    expect(page).to have_no_css(%{script[src^="/@embroider"]}, visible: false)
+  end
+
   scenario "is redirected with trailing slash", js: false do
     expect(include_index_path).to eq("/no-block")
 

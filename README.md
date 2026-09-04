@@ -591,7 +591,15 @@ Rails.application.routes.draw do
 end
 ```
 
-Then set each Ember application's `rootURL` to the mount point:
+The `index.html` of a Vite build refers to its assets with root-relative URLs.
+When the application is served from the build output, `mount_ember_app` remaps
+those references onto the mount point, where the assets are served — references
+that already carry the mount point, from a `rootURL` configured to match it,
+are left alone. Development-server-backed applications are unaffected: their
+asset URLs point at the development server absolutely.
+
+For classic (Broccoli-based) applications, set each Ember application's
+`rootURL` to the mount point:
 
 ```javascript
 // frontend/config/environment.js
