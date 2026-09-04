@@ -1,4 +1,4 @@
-main
+0.13.1
 ------
 
 * Fix `EmberCli::App#test` to report a failing suite by returning `false`
