@@ -1,5 +1,7 @@
 require "open3"
 
+require "ember_cli/errors"
+
 module EmberCli
   class Runner
     def initialize(out:, err:, env: {}, options: {})
@@ -25,7 +27,7 @@ module EmberCli
     def run!(command)
       run(command).tap do |status|
         unless status.success?
-          exit status.exitstatus
+          fail BuildError, "`#{command}` failed with status #{status.exitstatus}"
         end
       end
     end

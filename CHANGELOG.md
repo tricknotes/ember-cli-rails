@@ -1,3 +1,10 @@
+main
+------
+
+* Raise `EmberCli::BuildError` when `ember build` or a dependency
+  installation fails, instead of exiting the process from inside the gem —
+  `rake ember:compile` and `rake ember:install` still exit nonzero
+
 0.13.1
 ------
 
