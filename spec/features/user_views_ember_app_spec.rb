@@ -35,6 +35,20 @@ feature "User views ember app", :js do
     end
   end
 
+  # `render_ember_app` emits the application's complete HTML document, so the
+  # rendering action must disable its layout — the dummy application uses
+  # `HighVoltage.layout = false` — or the document ends up nested inside the
+  # layout's `<body>`.
+  scenario "renders a single, complete HTML document", js: false do
+    [include_index_path, include_index_head_and_body_path, default_path].each do |path|
+      visit path
+
+      expect(page.html.scan(/<!DOCTYPE/i).count).to eq(1)
+      expect(page.html.scan(/<html/i).count).to eq(1)
+      expect(page.html).not_to include("<title>Dummy</title>")
+    end
+  end
+
   scenario "is redirected with trailing slash", js: false do
     expect(include_index_path).to eq("/no-block")
 
