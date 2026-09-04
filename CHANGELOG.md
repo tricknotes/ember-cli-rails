@@ -1,3 +1,12 @@
+main
+------
+
+* Fix `EmberCli::App#test` to report a failing suite by returning `false`
+  instead of exiting the process from inside the gem — one failing Ember suite
+  no longer aborts the caller (RSpec included) mid-run. `EmberCli.test!`
+  raises `EmberCli::TestFailureError` when a suite fails, which still exits
+  `rake ember:test` nonzero
+
 0.13.0
 ------
 

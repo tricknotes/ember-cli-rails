@@ -44,7 +44,11 @@ module EmberCli
   end
 
   def test!
-    each_app(&:test)
+    each_app do |app|
+      unless app.test
+        fail TestFailureError, "The Ember test suite failed for #{app.name.inspect}"
+      end
+    end
   end
 
   def compile!
