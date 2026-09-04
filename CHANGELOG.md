@@ -1,4 +1,4 @@
-main
+0.13.2
 ------
 
 * Raise `EmberCli::BuildError` when `ember build` or a dependency
