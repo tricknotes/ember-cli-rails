@@ -27,6 +27,24 @@ describe EmberCli::DevServer do
 
       expect(origin).to eq("http://0.0.0.0:1234")
     end
+
+    it "honors a configured origin" do
+      dev_server = build_dev_server(
+        options: { host: "0.0.0.0", port: 4200, origin: "http://localhost:4200" },
+      )
+
+      origin = dev_server.origin
+
+      expect(origin).to eq("http://localhost:4200")
+    end
+
+    it "strips a trailing slash from a configured origin" do
+      dev_server = build_dev_server(options: { origin: "http://localhost:4200/" })
+
+      origin = dev_server.origin
+
+      expect(origin).to eq("http://localhost:4200")
+    end
   end
 
   describe "#port" do
@@ -57,6 +75,21 @@ describe EmberCli::DevServer do
       server.listen("127.0.0.1", 0)
       shell = FakeShell.new
       dev_server = build_dev_server(shell: shell, options: { port: server.port })
+
+      started = dev_server.start
+
+      expect(started).to be true
+      expect(shell.started_with).to be_nil
+    end
+
+    it "connects through the loopback interface when bound to every interface" do
+      server = null_server
+      server.listen("127.0.0.1", 0)
+      shell = FakeShell.new
+      dev_server = build_dev_server(
+        shell: shell,
+        options: { host: "0.0.0.0", port: server.port },
+      )
 
       started = dev_server.start
 
@@ -118,6 +151,22 @@ describe EmberCli::DevServer do
 
       expect(response.body).to eq("png-bytes")
       expect(server.requested_paths).to eq(["/assets/logo.png?v=1"])
+    end
+
+    it "requests the development server itself, not the configured origin" do
+      server = null_server
+      server.listen("127.0.0.1", 0, body: "ok")
+      dev_server = build_dev_server(
+        options: {
+          host: "0.0.0.0",
+          port: server.port,
+          origin: "http://origin.invalid:9999",
+        },
+      )
+
+      response = dev_server.get("/")
+
+      expect(response.body).to eq("ok")
     end
 
     it "ignores a configured HTTP proxy" do

@@ -8,6 +8,10 @@ main
 * Require `ember-cli-rails-assets >= 0.9.0`, which serves the
   `include_ember_script_tags` startup tags from Vite's development server
   when the application is served from it
+* Add an `origin` option to `dev_server`, separating the origin the browser
+  loads assets from, from the address the development server binds to — for
+  containers, where the server must bind to `0.0.0.0` but browsers refuse
+  that address as an origin
 
 0.13.0.beta1
 ------
