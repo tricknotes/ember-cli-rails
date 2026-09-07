@@ -11,8 +11,5 @@ Description:
 Example:
     rails generate ember:heroku
 
-    This will install the following gems:
-        rails_12factor
-
     This will create:
         package.json
