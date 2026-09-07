@@ -1,11 +1,16 @@
 Description:
     Configures a project for deploying to Heroku.
 
-    Once the generator is complete, execute the following:
+    Once the generator is complete, add the buildpacks the deploy needs:
 
         $ heroku buildpacks:clear
         $ heroku buildpacks:add --index 1 heroku/nodejs
         $ heroku buildpacks:add --index 2 heroku/ruby
+
+    `SKIP_EMBER` skips the build wherever it is set. Unset it on the Heroku
+    application, so that `assets:precompile` compiles the EmberCLI
+    applications at deploy time:
+
         $ heroku config:unset SKIP_EMBER
 
 Example:
@@ -13,3 +18,9 @@ Example:
 
     This will create:
         package.json
+
+    An application configured with `yarn` also creates:
+        yarn.lock
+
+    Run the generator again whenever you add an EmberCLI application: the
+    generated `cacheDirectories` names each application's `node_modules`.
