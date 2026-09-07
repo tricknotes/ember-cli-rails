@@ -8,9 +8,8 @@ main
 * Replace `EmberCli::App#yarn_enabled?` with `EmberCli::App#yarn?`
 * Pin the NodeJS version in the `package.json` that `rails generate
   ember:heroku` writes, from the `engines.node` the Ember applications
-  declare. Applications that declare different versions are left unpinned
-* Add `EmberCli::App#node_engine`, reading `engines.node` from the Ember
-  application's `package.json`
+  declare, read through the new `EmberCli::App#node_engine`. Applications
+  that declare different versions are left unpinned
 
 0.13.2
 ------
