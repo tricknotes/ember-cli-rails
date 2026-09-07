@@ -364,9 +364,7 @@ To configure your EmberCLI-Rails applications for Heroku:
 
 1. Execute `rails generate ember:heroku`.
 1. Commit the newly generated files.
-1. [Add the NodeJS buildpack][buildpack] and configure NPM to include the
-   `bower` dependency's executable file (if your build process requires
-   `bower`).
+1. [Add the NodeJS buildpack][buildpack].
 
 ```sh
 $ heroku buildpacks:clear
@@ -381,10 +379,21 @@ You are ready to deploy:
 $ git push heroku master
 ```
 
-EmberCLI compilation happens at deploy-time, triggered by the `asset:precompile` rake task.
+EmberCLI compilation happens at deploy-time, triggered by the
+`assets:precompile` rake task. This is the same for both build systems: Vite's
+[development server](#vite-based-applications) only runs in `development`, so
+a Vite-based application deploys exactly like a classic one — `ember build`
+writes to the build directory, and Rails serves the result.
 
 **NOTE** Run the generator each time you introduce additional EmberCLI
 applications into the project.
+
+**NodeJS version** — the buildpack reads `engines.node` from the *project
+root's* `package.json` (the file the generator writes), not from the Ember
+application's, and builds on the current LTS release when it names no version.
+Make sure the generated file requires a NodeJS that satisfies your Ember
+application's own `engines.node`: applications generated with `ember-cli >=
+6.8` require NodeJS `>= 20.19.0`.
 
 [buildpack]: https://devcenter.heroku.com/articles/using-multiple-buildpacks-for-an-app#adding-a-buildpack
 
@@ -400,12 +409,14 @@ A build-pack solution for this is discussed in [Issue #491][#491].
 
 ### Capistrano
 
-EmberCLI-Rails executes both `npm install` and `bower install` during EmberCLI's
-compilation, triggered by the  `asset:precompile` rake task.
+EmberCLI-Rails installs the Ember application's NodeJS dependencies during
+EmberCLI's compilation, triggered by the `assets:precompile` rake task. It runs
+`npm install`, or `yarn install` for an application configured with the `yarn`
+option.
 
-The `npm` and `bower` executables are required to be defined in the deployment
-SSH session's `$PATH`. It is not sufficient to modify the session's `$PATH` in
-a `.bash_profile`.
+The executables it runs are required to be defined in the deployment SSH
+session's `$PATH`. It is not sufficient to modify the session's `$PATH` in a
+`.bash_profile`.
 
 To resolve this issue, prepend the Node installation's `bin` directory to the
 target system's `$PATH`:
@@ -414,26 +425,26 @@ target system's `$PATH`:
 #config/deploy/production.rb
 
 set :default_env, {
-  "PATH" => "/home/deploy/.nvm/versions/node/v4.2.1/bin:$PATH"
+  "PATH" => "/home/deploy/.nvm/versions/node/v22.11.0/bin:$PATH"
 }
 ```
 
 The system in this example is using `nvm` to configure the node version. If
 you're not using `nvm`, make sure the string you prepend to the `$PATH` variable
-contains the directory or directories that contain the `bower` and `npm`
-executables.
+contains the directory or directories that contain the executables above. Point
+it at a NodeJS that satisfies the Ember application's `engines.node`:
+applications generated with `ember-cli >= 6.8` require NodeJS `>= 20.19.0`.
 
 #### For faster deployments
 
 Place the following in your `deploy/<environment>.rb`
 
 ```ruby
-set :linked_dirs, %w{<ember-app-name>/node_modules <ember-app-name>/bower_components}
+set :linked_dirs, %w{<ember-app-name>/node_modules}
 ```
 
-to avoid rebuilding all the node modules and bower components with every deploy.
-Replace `<ember-app-name>` with the name of your ember app (default is
-`frontend`).
+to avoid rebuilding all the node modules with every deploy. Replace
+`<ember-app-name>` with the name of your ember app (default is `frontend`).
 
 ## Override
 
