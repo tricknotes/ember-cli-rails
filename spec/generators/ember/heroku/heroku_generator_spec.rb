@@ -31,6 +31,21 @@ describe EmberCli::HerokuGenerator, type: :generator do
     end
   end
 
+  describe "Gemfile" do
+    it "leaves the Gemfile untouched" do
+      setup_destination
+      configure_application
+
+      run_generator
+
+      expect(gemfile_contents).to eq("")
+    end
+
+    def gemfile_contents
+      destination_root.join("Gemfile").read
+    end
+  end
+
   describe "package.json" do
     it "includes the root directory node_modules" do
       setup_destination
@@ -113,10 +128,10 @@ describe EmberCli::HerokuGenerator, type: :generator do
   def setup_destination
     prepare_destination
 
-    create_empty_gemfile_for_bundler
+    create_empty_gemfile
   end
 
-  def create_empty_gemfile_for_bundler
+  def create_empty_gemfile
     FileUtils.touch(destination_root.join("Gemfile"))
   end
 end

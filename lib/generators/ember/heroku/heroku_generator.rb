@@ -14,10 +14,6 @@ module EmberCli
       end
     end
 
-    def inject_12factor_gem
-      gem "rails_12factor", group: [:staging, :production]
-    end
-
     private
 
     def cache_directories
