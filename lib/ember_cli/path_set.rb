@@ -35,6 +35,10 @@ module EmberCli
       @gemfile ||= root.join("Gemfile")
     end
 
+    def package_json
+      @package_json ||= root.join("package.json")
+    end
+
     def bower_json
       root.join("bower.json")
     end

@@ -6,6 +6,11 @@ main
   natively since `5.0`, and every Rails version this gem supports is `>= 5.2`.
   To upgrade, remove `rails_12factor` from your project's `Gemfile`
 * Replace `EmberCli::App#yarn_enabled?` with `EmberCli::App#yarn?`
+* Pin the NodeJS version in the `package.json` that `rails generate
+  ember:heroku` writes, from the `engines.node` the Ember applications
+  declare. Applications that declare different versions are left unpinned
+* Add `EmberCli::App#node_engine`, reading `engines.node` from the Ember
+  application's `package.json`
 
 0.13.2
 ------

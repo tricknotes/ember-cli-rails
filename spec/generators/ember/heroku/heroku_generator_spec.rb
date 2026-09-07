@@ -82,6 +82,54 @@ describe EmberCli::HerokuGenerator, type: :generator do
       end
     end
 
+    describe "engines" do
+      it "pins the NodeJS version the Ember applications declare" do
+        setup_destination
+        configure_applications(node_engine: ">= 20.19.0")
+
+        run_generator
+
+        expect(package_json.fetch("engines")).to eq("node" => ">= 20.19.0")
+      end
+
+      it "omits engines when no Ember application declares one" do
+        setup_destination
+        configure_applications(node_engine: nil)
+
+        run_generator
+
+        expect(package_json.keys).not_to include("engines")
+      end
+
+      it "omits engines when the Ember applications disagree" do
+        setup_destination
+        configure_applications(
+          { node_engine: ">= 20.19.0" },
+          { node_engine: ">= 22.0.0" },
+        )
+
+        run_generator
+
+        expect(package_json.keys).not_to include("engines")
+      end
+
+      def configure_applications(*attributes)
+        apps = attributes.map do |app_attributes|
+          instance_double(
+            EmberCli::App,
+            {
+              bower?: false,
+              cached_directories: [],
+              yarn?: false,
+            }.merge(app_attributes),
+          )
+        end
+
+        allow(EmberCli).to receive(:apps).
+          and_return(apps.map.with_index { |app, i| ["app-#{i}", app] }.to_h)
+      end
+    end
+
     def depend_on_bower(bower_enabled)
       allow_any_instance_of(EmberCli::App).
         to receive(:bower?).and_return(bower_enabled)

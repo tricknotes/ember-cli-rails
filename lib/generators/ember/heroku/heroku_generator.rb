@@ -16,6 +16,26 @@ module EmberCli
 
     private
 
+    def node_engine
+      return @node_engine if defined?(@node_engine)
+
+      declared = apps.map(&:node_engine).compact.uniq
+
+      @node_engine =
+        if declared.size > 1
+          say_status(
+            :conflict,
+            "Ember applications declare different `engines.node` " \
+            "(#{declared.join(", ")}); pin one in package.json by hand",
+            :red,
+          )
+
+          nil
+        else
+          declared.first
+        end
+    end
+
     def cache_directories
       all_cached_directories.map do |cached_directory|
         cached_directory.relative_path_from(Rails.root).to_s
