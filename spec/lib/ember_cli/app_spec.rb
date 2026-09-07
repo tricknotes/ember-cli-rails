@@ -33,14 +33,12 @@ describe EmberCli::App do
     end
   end
 
-  describe "yarn_enabled?" do
+  describe "#yarn?" do
     context "when configured with yarn: true" do
       it "returns true" do
         app = EmberCli::App.new("with-yarn", yarn: true)
 
-        yarn_enabled = app.yarn_enabled?
-
-        expect(yarn_enabled).to be true
+        expect(app.yarn?).to be true
       end
     end
 
@@ -48,9 +46,23 @@ describe EmberCli::App do
       it "returns false" do
         app = EmberCli::App.new("without-yarn", yarn: false)
 
-        yarn_enabled = app.yarn_enabled?
+        expect(app.yarn?).to be false
+      end
+    end
 
-        expect(yarn_enabled).to be false
+    context "when configured with yarn_path alone" do
+      it "returns true, matching the executable the installer runs" do
+        app = EmberCli::App.new("with-yarn-path", yarn_path: "/usr/bin/yarn")
+
+        expect(app.yarn?).to be true
+      end
+    end
+
+    context "when configured with neither" do
+      it "returns false" do
+        app = EmberCli::App.new("without-yarn")
+
+        expect(app.yarn?).to be false
       end
     end
   end

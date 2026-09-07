@@ -9,7 +9,7 @@ module EmberCli
     end
 
     def identify_as_yarn_project
-      if EmberCli.any?(&:yarn_enabled?)
+      if EmberCli.any?(&:yarn?)
         template "yarn.lock.erb", "yarn.lock"
       end
     end

@@ -91,8 +91,8 @@ module EmberCli
       deploy.mountable?
     end
 
-    def yarn_enabled?
-      options.fetch(:yarn, false)
+    def yarn?
+      paths.yarn?
     end
 
     def bower?
