@@ -5,6 +5,7 @@ main
   ember:heroku`. Rails serves the twelve-factor behaviour the gem backported
   natively since `5.0`, and every Rails version this gem supports is `>= 5.2`.
   To upgrade, remove `rails_12factor` from your project's `Gemfile`
+* Replace `EmberCli::App#yarn_enabled?` with `EmberCli::App#yarn?`
 
 0.13.2
 ------

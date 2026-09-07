@@ -212,6 +212,28 @@ describe EmberCli::PathSet do
     end
   end
 
+  describe "#yarn?" do
+    it "is true when yarn is requested" do
+      app = build_app(options: { yarn: true })
+      path_set = build_path_set(app: app)
+
+      expect(path_set).to be_yarn
+    end
+
+    it "is true when only the yarn executable is named" do
+      app = build_app(options: { yarn_path: "/usr/bin/yarn" })
+      path_set = build_path_set(app: app)
+
+      expect(path_set).to be_yarn
+    end
+
+    it "is false when yarn is neither requested nor named" do
+      path_set = build_path_set
+
+      expect(path_set).not_to be_yarn
+    end
+  end
+
   describe "#yarn" do
     it "can be overridden" do
       fake_yarn = create_executable(ember_cli_root.join("yarn"))

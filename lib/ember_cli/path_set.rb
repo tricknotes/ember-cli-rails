@@ -134,6 +134,10 @@ module EmberCli
       @node_modules ||= root.join("node_modules")
     end
 
+    def yarn?
+      app_options[:yarn].present? || app_options[:yarn_path].present?
+    end
+
     def tee
       @tee ||= path_for_executable("tee")
     end
@@ -167,10 +171,6 @@ module EmberCli
       else
         "npm"
       end
-    end
-
-    def yarn?
-      app_options[:yarn] || app_options[:yarn_path]
     end
 
     def app_name
