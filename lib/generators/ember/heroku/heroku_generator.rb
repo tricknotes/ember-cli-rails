@@ -38,12 +38,6 @@ module EmberCli
       [Rails.root.join("node_modules")]
     end
 
-    def app_paths
-      EmberCli.apps.values.map do |app|
-        app.root_path.relative_path_from(Rails.root)
-      end
-    end
-
     def apps
       EmberCli.apps.values
     end
