@@ -1,3 +1,5 @@
+require "json"
+
 require "html_page/renderer"
 require "ember_cli/path_set"
 require "ember_cli/shell"
@@ -97,6 +99,16 @@ module EmberCli
 
     def bower?
       paths.bower_json.exist?
+    end
+
+    def node_engine
+      package_json = paths.package_json
+
+      if package_json.exist?
+        JSON.parse(package_json.read).dig("engines", "node")
+      end
+    rescue JSON::ParserError
+      nil
     end
 
     def to_rack

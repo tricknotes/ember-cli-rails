@@ -4,5 +4,10 @@
     "bower": "*"
   },
   <% end %>
+  <% if node_engine %>
+  "engines": {
+    "node": <%= node_engine.to_json %>
+  },
+  <% end %>
   "cacheDirectories": <%= cache_directories.to_json %>
 }

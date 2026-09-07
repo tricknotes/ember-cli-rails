@@ -93,6 +93,42 @@ describe EmberCli::App do
     end
   end
 
+  describe "#node_engine" do
+    it "reads engines.node from the application's package.json" do
+      stub_package_json('{"engines":{"node":">= 20.19.0"}}')
+      app = EmberCli::App.new("with node engine")
+
+      expect(app.node_engine).to eq ">= 20.19.0"
+    end
+
+    it "returns nil when the package.json declares no engines" do
+      stub_package_json('{"name":"frontend"}')
+      app = EmberCli::App.new("without engines")
+
+      expect(app.node_engine).to be_nil
+    end
+
+    it "returns nil when the package.json is absent" do
+      stub_paths(package_json: double("Pathname", exist?: false))
+      app = EmberCli::App.new("without package json")
+
+      expect(app.node_engine).to be_nil
+    end
+
+    it "returns nil when the package.json is malformed" do
+      stub_package_json("{")
+      app = EmberCli::App.new("with malformed package json")
+
+      expect(app.node_engine).to be_nil
+    end
+
+    def stub_package_json(contents)
+      stub_paths(
+        package_json: double("Pathname", exist?: true, read: contents),
+      )
+    end
+  end
+
   describe "#compile" do
     it "exits with exit status of 0" do
       passed = EmberCli["my-app"].compile
