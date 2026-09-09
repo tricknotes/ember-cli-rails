@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     # Named explicitly so that `experimental` stays out of the job name.
-    name: "build (${{ matrix.ruby }}, ${{ matrix.rails }}, ${{ matrix.ember }})"
+    name: "build (${{ matrix.ruby }}, ${{ matrix.rails }}, ${{ matrix.ember }}, ${{ matrix.package_manager }})"
     runs-on: "ubuntu-latest"
 
     # Jobs normally finish in about 3 minutes; a hung job once ran for
@@ -28,23 +28,47 @@ jobs:
         # dummy app. `>= 6.8` uses the Vite-based blueprint, older
         # versions use the classic Broccoli-based build.
         ember: ["7.0.0"]
+        # `package_manager` installs the dummy app's NodeJS dependencies:
+        # `npm`, `yarn`, or `pnpm`.
+        package_manager: ["npm"]
         include:
           - ruby: "4.0"
             rails: "main"
             ember: "7.0.0"
+            package_manager: "npm"
             experimental: true
           # Classic (Broccoli-based) blueprint coverage
           - ruby: "3.4"
             rails: "8.1"
             ember: "5.12.0"
+            package_manager: "npm"
           - ruby: "3.4"
             rails: "8.1"
             ember: "6.7.2"
+            package_manager: "npm"
+          # Yarn and pnpm coverage, for both blueprints
+          - ruby: "3.4"
+            rails: "8.1"
+            ember: "7.0.0"
+            package_manager: "yarn"
+          - ruby: "3.4"
+            rails: "8.1"
+            ember: "5.12.0"
+            package_manager: "yarn"
+          - ruby: "3.4"
+            rails: "8.1"
+            ember: "7.0.0"
+            package_manager: "pnpm"
+          - ruby: "3.4"
+            rails: "8.1"
+            ember: "5.12.0"
+            package_manager: "pnpm"
 
     env:
       RAILS_ENV: "test"
       RAILS_VERSION: "${{ matrix.rails }}"
       EMBER_VERSION: "${{ matrix.ember }}"
+      PACKAGE_MANAGER: "${{ matrix.package_manager }}"
 
     steps:
     - uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
@@ -53,6 +77,16 @@ jobs:
       uses: "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020" # v7.0.0
       with:
         node-version: "22.x"
+
+    - name: "Install Yarn"
+      if: "matrix.package_manager == 'yarn'"
+      run: |
+        npm install -g yarn@1
+
+    - name: "Install pnpm"
+      if: "matrix.package_manager == 'pnpm'"
+      run: |
+        npm install -g pnpm@latest-10
 
     - name: "Install Ruby ${{ matrix.ruby }}"
       uses: "ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b" # v1.321.0

@@ -231,7 +231,8 @@ describe EmberCli::HerokuGenerator, type: :generator do
   end
 
   # Register only this application: the dummy project's own applications
-  # would otherwise take part in the generator's `EmberCli.any?` checks.
+  # would otherwise take part in the generator's `EmberCli.any?` checks, with
+  # whatever package manager `bin/setup_ember` installed them with.
   def configure_application(**options)
     app = EmberCli::App.new("my-app", **options)
 
