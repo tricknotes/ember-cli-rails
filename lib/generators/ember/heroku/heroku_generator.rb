@@ -14,26 +14,46 @@ module EmberCli
       end
     end
 
+    def identify_as_pnpm_project
+      if EmberCli.any?(&:pnpm?)
+        template "pnpm-lock.yaml.erb", "pnpm-lock.yaml"
+      end
+    end
+
     private
 
     def node_engine
-      return @node_engine if defined?(@node_engine)
+      unless defined?(@node_engine)
+        @node_engine = shared_declaration("engines.node", &:node_engine)
+      end
 
-      declared = apps.map(&:node_engine).compact.uniq
+      @node_engine
+    end
 
-      @node_engine =
-        if declared.size > 1
-          say_status(
-            :conflict,
-            "Ember applications declare different `engines.node` " \
-            "(#{declared.join(", ")}); pin one in package.json by hand",
-            :red,
-          )
+    def package_manager_spec
+      unless defined?(@package_manager_spec)
+        @package_manager_spec = shared_declaration("packageManager", &:package_manager_spec)
+      end
 
-          nil
-        else
-          declared.first
-        end
+      @package_manager_spec
+    end
+
+    # The value every Ember application declares for a `package.json` field, or nil when they declare different ones:
+    # the generated `package.json` can only carry one, and picking either would silently break the other application's build.
+    def shared_declaration(field)
+      declared = apps.map { |app| yield app }.compact.uniq
+
+      if declared.size > 1
+        say_status(
+          :conflict,
+          "Ember applications declare different `#{field}` (#{declared.join(", ")}); pin one in package.json by hand",
+          :red,
+        )
+
+        nil
+      else
+        declared.first
+      end
     end
 
     def cache_directories

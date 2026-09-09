@@ -393,6 +393,14 @@ writes to the build directory, and Rails serves the result.
 **NOTE** Run the generator each time you introduce additional EmberCLI
 applications into the project.
 
+**Package manager** — the buildpack installs the package manager the *project
+root's* lockfile names. The generator writes an empty `yarn.lock` or
+`pnpm-lock.yaml` when an application is configured with yarn or pnpm as its
+`package_manager`, and copies the `packageManager` field the Ember
+applications declare into the generated `package.json` so that the buildpack
+installs that version. Without a `packageManager` field the buildpack installs
+the latest pnpm release.
+
 **NodeJS version** — the buildpack reads `engines.node` from the *project
 root's* `package.json` (the file the generator writes), not from the Ember
 application's, and builds on the current LTS release when it names no version.

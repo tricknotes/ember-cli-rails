@@ -4,6 +4,9 @@
     "bower": "*"
   },
   <% end %>
+  <% if package_manager_spec %>
+  "packageManager": <%= package_manager_spec.to_json %>,
+  <% end %>
   <% if node_engine %>
   "engines": {
     "node": <%= node_engine.to_json %>

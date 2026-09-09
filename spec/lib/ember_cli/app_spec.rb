@@ -157,6 +157,35 @@ describe EmberCli::App do
     end
   end
 
+  describe "#package_manager_spec" do
+    it "reads packageManager from the application's package.json" do
+      stub_package_json('{"packageManager":"pnpm@10.0.0"}')
+      app = EmberCli::App.new("with package manager")
+
+      expect(app.package_manager_spec).to eq "pnpm@10.0.0"
+    end
+
+    it "returns nil when the package.json declares no packageManager" do
+      stub_package_json('{"name":"frontend"}')
+      app = EmberCli::App.new("without package manager")
+
+      expect(app.package_manager_spec).to be_nil
+    end
+
+    it "returns nil when the package.json is absent" do
+      stub_paths(package_json: double("Pathname", exist?: false))
+      app = EmberCli::App.new("without package json")
+
+      expect(app.package_manager_spec).to be_nil
+    end
+
+    def stub_package_json(contents)
+      stub_paths(
+        package_json: double("Pathname", exist?: true, read: contents),
+      )
+    end
+  end
+
   describe "#compile" do
     it "exits with exit status of 0" do
       passed = EmberCli["my-app"].compile
