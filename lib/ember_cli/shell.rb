@@ -69,8 +69,11 @@ module EmberCli
         clean_ember_dependencies!
       end
 
-      if paths.yarn
+      case paths.package_manager
+      when :yarn
         run! "#{paths.yarn} install"
+      when :pnpm
+        run! "#{paths.pnpm} install"
       else
         run! "#{paths.npm} prune && #{paths.npm} install"
       end

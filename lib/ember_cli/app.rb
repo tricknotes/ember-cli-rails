@@ -93,8 +93,16 @@ module EmberCli
       deploy.mountable?
     end
 
+    def package_manager
+      paths.package_manager
+    end
+
     def yarn?
       paths.yarn?
+    end
+
+    def pnpm?
+      paths.pnpm?
     end
 
     def bower?

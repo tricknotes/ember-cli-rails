@@ -1,6 +1,11 @@
 main
 ------
 
+* Add the `package_manager` option to install an application's NodeJS
+  dependencies with pnpm (`package_manager: :pnpm`), yarn, or npm. `yarn:
+  true` remains as shorthand for `package_manager: :yarn`, and `pnpm_path`
+  implies pnpm the way `yarn_path` implies yarn. The package manager is read
+  through the new `EmberCli::App#package_manager` and `EmberCli::App#pnpm?`
 * Stop adding `rails_12factor` to the `Gemfile` from `rails generate
   ember:heroku`. Rails serves the twelve-factor behaviour the gem backported
   natively since `5.0`, and every Rails version this gem supports is `>= 5.2`.

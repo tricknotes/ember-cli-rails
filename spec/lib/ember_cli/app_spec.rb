@@ -67,6 +67,34 @@ describe EmberCli::App do
     end
   end
 
+  describe "#package_manager" do
+    it "is npm by default" do
+      app = EmberCli::App.new("with-npm")
+
+      expect(app.package_manager).to eq :npm
+    end
+
+    it "is the package manager configured" do
+      app = EmberCli::App.new("with-pnpm", package_manager: :pnpm)
+
+      expect(app.package_manager).to eq :pnpm
+    end
+  end
+
+  describe "#pnpm?" do
+    it "returns true when configured with package_manager: :pnpm" do
+      app = EmberCli::App.new("with-pnpm", package_manager: :pnpm)
+
+      expect(app.pnpm?).to be true
+    end
+
+    it "returns false when configured with another package manager" do
+      app = EmberCli::App.new("with-yarn", yarn: true)
+
+      expect(app.pnpm?).to be false
+    end
+  end
+
   describe "#bower?" do
     context "when bower.json exists" do
       it "returns true" do

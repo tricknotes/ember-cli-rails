@@ -79,7 +79,12 @@ c.app :frontend, path: "~/projects/my-ember-app"
 
 - `silent` - this provides `--silent` option for Ember CLI commands to control verbosity of their output.
 
-- `yarn` - enables the [yarn](https://github.com/yarnpkg/yarn) package manager when installing dependencies
+- `package_manager` - the package manager that installs the application's
+  NodeJS dependencies: `:npm` (the default), `:yarn`, or `:pnpm`. Name the
+  executable with `npm_path`, `yarn_path`, or `pnpm_path` when it is not on
+  the `$PATH`.
+
+- `yarn` - shorthand for `package_manager: :yarn`
 
 - `dev_server` - configures [Vite's development server](#vite-based-applications)
   for Vite-based applications in `development`. Pass `false` to opt out of it,
@@ -411,8 +416,8 @@ A build-pack solution for this is discussed in [Issue #491][#491].
 
 EmberCLI-Rails installs the Ember application's NodeJS dependencies during
 EmberCLI's compilation, triggered by the `assets:precompile` rake task. It runs
-`npm install`, or `yarn install` for an application configured with the `yarn`
-option.
+`npm install`, `yarn install`, or `pnpm install`, as the application's
+`package_manager` option names.
 
 The executables it runs are required to be defined in the deployment SSH
 session's `$PATH`. It is not sufficient to modify the session's `$PATH` in a

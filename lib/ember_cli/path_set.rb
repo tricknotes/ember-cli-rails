@@ -2,6 +2,15 @@ require "ember_cli/helpers"
 
 module EmberCli
   class PathSet
+    PACKAGE_MANAGERS = %i[npm yarn pnpm].freeze
+
+    # npm ships with NodeJS, so it has no installation instructions of its own
+    # to point at when its executable is missing.
+    INSTALL_INSTRUCTIONS = {
+      yarn: "https://yarnpkg.com/lang/en/docs/install/",
+      pnpm: "https://pnpm.io/installation",
+    }.freeze
+
     def initialize(app:, rails_root:, ember_cli_root:, environment:)
       @app = app
       @rails_root = rails_root
@@ -121,16 +130,13 @@ module EmberCli
 
     def yarn
       if yarn?
-        @yarn ||= path_for_executable("yarn").tap do |yarn|
-          unless File.executable?(yarn.to_s)
-            fail DependencyError.new(<<-MSG.strip_heredoc)
-                EmberCLI has been configured to install NodeJS dependencies with Yarn, but the Yarn executable is unavailable.
+        @yarn ||= package_manager_executable(:yarn)
+      end
+    end
 
-                Install it by following the instructions at https://yarnpkg.com/lang/en/docs/install/
-
-            MSG
-          end
-        end
+    def pnpm
+      if pnpm?
+        @pnpm ||= package_manager_executable(:pnpm)
       end
     end
 
@@ -138,8 +144,36 @@ module EmberCli
       @node_modules ||= root.join("node_modules")
     end
 
+    # The package manager that installs the application's NodeJS
+    # dependencies: the one the `package_manager` option names, else the one
+    # whose executable a `yarn_path` or `pnpm_path` option names (with
+    # `yarn: true` as a shorthand for `package_manager: :yarn`), else npm.
+    def package_manager
+      requested = app_options[:package_manager]
+
+      if requested.present?
+        requested.to_s.to_sym.tap do |name|
+          unless PACKAGE_MANAGERS.include?(name)
+            fail ArgumentError,
+              "Unsupported package manager #{requested.inspect} for " \
+              "`#{app_name}`; use one of #{PACKAGE_MANAGERS.inspect}"
+          end
+        end
+      elsif app_options[:yarn].present? || app_options[:yarn_path].present?
+        :yarn
+      elsif app_options[:pnpm_path].present?
+        :pnpm
+      else
+        :npm
+      end
+    end
+
     def yarn?
-      app_options[:yarn].present? || app_options[:yarn_path].present?
+      package_manager == :yarn
+    end
+
+    def pnpm?
+      package_manager == :pnpm
     end
 
     def tee
@@ -169,11 +203,16 @@ module EmberCli
       end
     end
 
-    def package_manager
-      if yarn?
-        "yarn"
-      else
-        "npm"
+    def package_manager_executable(name)
+      path_for_executable(name.to_s).tap do |path|
+        unless File.executable?(path.to_s)
+          fail DependencyError.new(<<-MSG.strip_heredoc)
+              EmberCLI has been configured to install NodeJS dependencies with #{name}, but the #{name} executable is unavailable.
+
+              Install it by following the instructions at #{INSTALL_INSTRUCTIONS.fetch(name)}
+
+          MSG
+        end
       end
     end
 
