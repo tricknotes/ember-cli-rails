@@ -1,4 +1,5 @@
 require "fileutils"
+require "active_support/deprecation"
 require "ember-cli-rails-assets"
 require "ember_cli/engine"
 require "ember_cli/configuration"
@@ -14,6 +15,10 @@ module EmberCli
 
   def configuration
     Configuration.instance
+  end
+
+  def deprecator
+    @deprecator ||= ActiveSupport::Deprecation.new("1.0", "ember-cli-rails")
   end
 
   def app(name)

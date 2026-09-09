@@ -233,17 +233,30 @@ describe EmberCli::PathSet do
       expect(path_set.package_manager).to eq :pnpm
     end
 
-    it "is yarn when yarn is requested the old way" do
+    it "is yarn when the deprecated yarn shorthand is given, with a warning" do
       app = build_app(options: { yarn: true })
       path_set = build_path_set(app: app)
 
+      expect { path_set.package_manager }.
+        to output(/`yarn` option.*deprecated.*package_manager: :yarn/).
+        to_stderr
       expect(path_set.package_manager).to eq :yarn
+    end
+
+    it "warns about the yarn shorthand once" do
+      app = build_app(options: { yarn: true })
+      path_set = build_path_set(app: app)
+
+      expect(EmberCli.deprecator).to receive(:warn).once
+
+      2.times { path_set.package_manager }
     end
 
     it "prefers the package manager requested over the yarn shorthand" do
       app = build_app(options: { package_manager: :pnpm, yarn: true })
       path_set = build_path_set(app: app)
 
+      expect { path_set.package_manager }.not_to output.to_stderr
       expect(path_set.package_manager).to eq :pnpm
     end
 
@@ -265,7 +278,7 @@ describe EmberCli::PathSet do
 
   describe "#yarn?" do
     it "is true when yarn is requested" do
-      app = build_app(options: { yarn: true })
+      app = build_app(options: { package_manager: :yarn })
       path_set = build_path_set(app: app)
 
       expect(path_set).to be_yarn
@@ -299,7 +312,7 @@ describe EmberCli::PathSet do
     it "can be inferred from the $PATH" do
       fake_yarn = create_executable(ember_cli_root.join("yarn"))
       stub_which(yarn: fake_yarn.to_s)
-      app = build_app(options: { yarn: true })
+      app = build_app(options: { package_manager: :yarn })
       path_set = build_path_set(app: app)
       create_executable(fake_yarn)
 
@@ -312,7 +325,7 @@ describe EmberCli::PathSet do
       context "and yarn is requested" do
         it "raises a DependencyError" do
           stub_which(yarn: nil)
-          app = build_app(options: { yarn: true })
+          app = build_app(options: { package_manager: :yarn })
           path_set = build_path_set(app: app)
 
           expect { path_set.yarn }.to raise_error(EmberCli::DependencyError)

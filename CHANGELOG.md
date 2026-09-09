@@ -2,10 +2,11 @@ main
 ------
 
 * Add the `package_manager` option to install an application's NodeJS
-  dependencies with pnpm (`package_manager: :pnpm`), yarn, or npm. `yarn:
-  true` remains as shorthand for `package_manager: :yarn`, and `pnpm_path`
+  dependencies with pnpm (`package_manager: :pnpm`), yarn, or npm. `pnpm_path`
   implies pnpm the way `yarn_path` implies yarn. The package manager is read
   through the new `EmberCli::App#package_manager` and `EmberCli::App#pnpm?`
+* Deprecate `yarn: true` in favour of `package_manager: :yarn`. The shorthand
+  still selects yarn, with a deprecation warning, and will be removed in `1.0`
 * Identify a project with a pnpm application to Heroku's NodeJS buildpack
   from `rails generate ember:heroku`, with a root-level `pnpm-lock.yaml`, and
   pin the package manager version in the generated `package.json` from the

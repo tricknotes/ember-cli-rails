@@ -146,25 +146,34 @@ module EmberCli
 
     # The package manager that installs the application's NodeJS
     # dependencies: the one the `package_manager` option names, else the one
-    # whose executable a `yarn_path` or `pnpm_path` option names (with
-    # `yarn: true` as a shorthand for `package_manager: :yarn`), else npm.
+    # whose executable a `yarn_path` or `pnpm_path` option names, else npm.
+    # The deprecated `yarn: true` still selects yarn, with a warning.
     def package_manager
-      requested = app_options[:package_manager]
+      @package_manager ||= begin
+        requested = app_options[:package_manager]
 
-      if requested.present?
-        requested.to_s.to_sym.tap do |name|
-          unless PACKAGE_MANAGERS.include?(name)
-            fail ArgumentError,
-              "Unsupported package manager #{requested.inspect} for " \
-              "`#{app_name}`; use one of #{PACKAGE_MANAGERS.inspect}"
+        if requested.present?
+          requested.to_s.to_sym.tap do |name|
+            unless PACKAGE_MANAGERS.include?(name)
+              fail ArgumentError,
+                "Unsupported package manager #{requested.inspect} for " \
+                "`#{app_name}`; use one of #{PACKAGE_MANAGERS.inspect}"
+            end
           end
+        elsif app_options[:yarn].present?
+          EmberCli.deprecator.warn(
+            "The `yarn` option of the `#{app_name}` Ember application is " \
+            "deprecated; configure it with `package_manager: :yarn` instead",
+          )
+
+          :yarn
+        elsif app_options[:yarn_path].present?
+          :yarn
+        elsif app_options[:pnpm_path].present?
+          :pnpm
+        else
+          :npm
         end
-      elsif app_options[:yarn].present? || app_options[:yarn_path].present?
-        :yarn
-      elsif app_options[:pnpm_path].present?
-        :pnpm
-      else
-        :npm
       end
     end
 

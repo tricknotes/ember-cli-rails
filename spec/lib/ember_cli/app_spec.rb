@@ -34,11 +34,13 @@ describe EmberCli::App do
   end
 
   describe "#yarn?" do
-    context "when configured with yarn: true" do
+    context "when configured with the deprecated yarn: true" do
       it "returns true" do
         app = EmberCli::App.new("with-yarn", yarn: true)
 
-        expect(app.yarn?).to be true
+        yarn = EmberCli.deprecator.silence { app.yarn? }
+
+        expect(yarn).to be true
       end
     end
 
@@ -89,7 +91,7 @@ describe EmberCli::App do
     end
 
     it "returns false when configured with another package manager" do
-      app = EmberCli::App.new("with-yarn", yarn: true)
+      app = EmberCli::App.new("with-yarn", package_manager: :yarn)
 
       expect(app.pnpm?).to be false
     end

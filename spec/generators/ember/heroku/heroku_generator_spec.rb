@@ -8,7 +8,7 @@ describe EmberCli::HerokuGenerator, type: :generator do
   context "without yarn enabled" do
     it "does not generate a root-level yarn.lock" do
       setup_destination
-      configure_application(yarn: false)
+      configure_application(package_manager: :npm)
 
       run_generator
 
@@ -21,7 +21,7 @@ describe EmberCli::HerokuGenerator, type: :generator do
   context "with yarn enabled" do
     it "generates a root-level yarn.lock" do
       setup_destination
-      configure_application(yarn: true)
+      configure_application(package_manager: :yarn)
 
       run_generator
 

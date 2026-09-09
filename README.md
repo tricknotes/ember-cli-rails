@@ -84,8 +84,6 @@ c.app :frontend, path: "~/projects/my-ember-app"
   executable with `npm_path`, `yarn_path`, or `pnpm_path` when it is not on
   the `$PATH`.
 
-- `yarn` - shorthand for `package_manager: :yarn`
-
 - `dev_server` - configures [Vite's development server](#vite-based-applications)
   for Vite-based applications in `development`. Pass `false` to opt out of it,
   or a Hash of `host`, `port`, and `timeout` settings.
