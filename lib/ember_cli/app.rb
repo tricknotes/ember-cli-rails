@@ -93,8 +93,16 @@ module EmberCli
       deploy.mountable?
     end
 
+    def package_manager
+      paths.package_manager
+    end
+
     def yarn?
       paths.yarn?
+    end
+
+    def pnpm?
+      paths.pnpm?
     end
 
     def bower?
@@ -102,13 +110,14 @@ module EmberCli
     end
 
     def node_engine
-      package_json = paths.package_json
+      package_json_value("engines", "node")
+    end
 
-      if package_json.exist?
-        JSON.parse(package_json.read).dig("engines", "node")
-      end
-    rescue JSON::ParserError
-      nil
+    # The `packageManager` field of the application's `package.json`, such as
+    # `"pnpm@10.0.0"`: the package manager version Corepack and Heroku's
+    # NodeJS buildpack install.
+    def package_manager_spec
+      package_json_value("packageManager")
     end
 
     def to_rack
@@ -134,6 +143,16 @@ module EmberCli
     end
 
     private
+
+    def package_json_value(*keys)
+      package_json = paths.package_json
+
+      if package_json.exist?
+        JSON.parse(package_json.read).dig(*keys)
+      end
+    rescue JSON::ParserError
+      nil
+    end
 
     def development?
       env.to_s == "development"

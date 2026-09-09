@@ -8,7 +8,7 @@ describe EmberCli::HerokuGenerator, type: :generator do
   context "without yarn enabled" do
     it "does not generate a root-level yarn.lock" do
       setup_destination
-      configure_application(yarn: false)
+      configure_application(package_manager: :npm)
 
       run_generator
 
@@ -21,12 +21,38 @@ describe EmberCli::HerokuGenerator, type: :generator do
   context "with yarn enabled" do
     it "generates a root-level yarn.lock" do
       setup_destination
-      configure_application(yarn: true)
+      configure_application(package_manager: :yarn)
 
       run_generator
 
       expect(destination_root).to have_structure {
         file "yarn.lock"
+      }
+    end
+  end
+
+  context "without pnpm enabled" do
+    it "does not generate a root-level pnpm-lock.yaml" do
+      setup_destination
+      configure_application(package_manager: :npm)
+
+      run_generator
+
+      expect(destination_root).to have_structure {
+        no_file "pnpm-lock.yaml"
+      }
+    end
+  end
+
+  context "with pnpm enabled" do
+    it "generates a root-level pnpm-lock.yaml" do
+      setup_destination
+      configure_application(package_manager: :pnpm)
+
+      run_generator
+
+      expect(destination_root).to have_structure {
+        file "pnpm-lock.yaml"
       }
     end
   end
@@ -112,22 +138,57 @@ describe EmberCli::HerokuGenerator, type: :generator do
 
         expect(package_json.keys).not_to include("engines")
       end
+    end
 
-      def configure_applications(*attributes)
-        apps = attributes.map do |app_attributes|
-          instance_double(
-            EmberCli::App,
-            {
-              bower?: false,
-              cached_directories: [],
-              yarn?: false,
-            }.merge(app_attributes),
-          )
-        end
+    describe "packageManager" do
+      it "pins the package manager the Ember applications declare" do
+        setup_destination
+        configure_applications(package_manager_spec: "pnpm@10.0.0")
 
-        allow(EmberCli).to receive(:apps).
-          and_return(apps.map.with_index { |app, i| ["app-#{i}", app] }.to_h)
+        run_generator
+
+        expect(package_json.fetch("packageManager")).to eq("pnpm@10.0.0")
       end
+
+      it "omits packageManager when no Ember application declares one" do
+        setup_destination
+        configure_applications(package_manager_spec: nil)
+
+        run_generator
+
+        expect(package_json.keys).not_to include("packageManager")
+      end
+
+      it "omits packageManager when the Ember applications disagree" do
+        setup_destination
+        configure_applications(
+          { package_manager_spec: "pnpm@10.0.0" },
+          { package_manager_spec: "pnpm@9.0.0" },
+        )
+
+        run_generator
+
+        expect(package_json.keys).not_to include("packageManager")
+      end
+    end
+
+    def configure_applications(*attributes)
+      apps = attributes.map do |app_attributes|
+        instance_double(
+          EmberCli::App,
+          {
+            bower?: false,
+            cached_directories: [],
+            node_engine: nil,
+            package_manager_spec: nil,
+            pnpm?: false,
+            yarn?: false,
+          }.merge(app_attributes),
+        )
+      end
+
+      allow(EmberCli).to receive(:apps).
+        and_return(apps.map.with_index { |app, i| ["app-#{i}", app] }.to_h)
     end
 
     def depend_on_bower(bower_enabled)
@@ -169,8 +230,13 @@ describe EmberCli::HerokuGenerator, type: :generator do
     end
   end
 
+  # Register only this application: the dummy project's own applications
+  # would otherwise take part in the generator's `EmberCli.any?` checks, with
+  # whatever package manager `bin/setup_ember` installed them with.
   def configure_application(**options)
-    EmberCli.configure { |c| c.app("my-app", **options) }
+    app = EmberCli::App.new("my-app", **options)
+
+    allow(EmberCli).to receive(:apps).and_return("my-app" => app)
   end
 
   def setup_destination

@@ -1,5 +1,9 @@
+# `bin/setup_ember` installs the applications' dependencies with the package
+# manager PACKAGE_MANAGER names, so register the same one here.
+package_manager = ENV.fetch("PACKAGE_MANAGER", "npm").to_sym
+
 EmberCli.configure do |c|
-  c.app "my-app"
+  c.app "my-app", package_manager: package_manager
 
   # The same Ember application, served by Vite's development server.
   #
@@ -15,6 +19,7 @@ EmberCli.configure do |c|
   # leaves the page blank.
   c.app "my-app-dev-server",
     path: "my-app-dev-server",
+    package_manager: package_manager,
     deploy: { test: EmberCli::Deploy::DevServer },
     dev_server: { timeout: 120 }
 end

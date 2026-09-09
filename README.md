@@ -79,7 +79,10 @@ c.app :frontend, path: "~/projects/my-ember-app"
 
 - `silent` - this provides `--silent` option for Ember CLI commands to control verbosity of their output.
 
-- `yarn` - enables the [yarn](https://github.com/yarnpkg/yarn) package manager when installing dependencies
+- `package_manager` - the package manager that installs the application's
+  NodeJS dependencies: `:npm` (the default), `:yarn`, or `:pnpm`. Name the
+  executable with `npm_path`, `yarn_path`, or `pnpm_path` when it is not on
+  the `$PATH`.
 
 - `dev_server` - configures [Vite's development server](#vite-based-applications)
   for Vite-based applications in `development`. Pass `false` to opt out of it,
@@ -388,6 +391,14 @@ writes to the build directory, and Rails serves the result.
 **NOTE** Run the generator each time you introduce additional EmberCLI
 applications into the project.
 
+**Package manager** — the buildpack installs the package manager the *project
+root's* lockfile names. The generator writes an empty `yarn.lock` or
+`pnpm-lock.yaml` when an application is configured with yarn or pnpm as its
+`package_manager`, and copies the `packageManager` field the Ember
+applications declare into the generated `package.json` so that the buildpack
+installs that version. Without a `packageManager` field the buildpack installs
+the latest pnpm release.
+
 **NodeJS version** — the buildpack reads `engines.node` from the *project
 root's* `package.json` (the file the generator writes), not from the Ember
 application's, and builds on the current LTS release when it names no version.
@@ -411,8 +422,8 @@ A build-pack solution for this is discussed in [Issue #491][#491].
 
 EmberCLI-Rails installs the Ember application's NodeJS dependencies during
 EmberCLI's compilation, triggered by the `assets:precompile` rake task. It runs
-`npm install`, or `yarn install` for an application configured with the `yarn`
-option.
+`npm install`, `yarn install`, or `pnpm install`, as the application's
+`package_manager` option names.
 
 The executables it runs are required to be defined in the deployment SSH
 session's `$PATH`. It is not sufficient to modify the session's `$PATH` in a

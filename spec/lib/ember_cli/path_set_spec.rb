@@ -212,9 +212,73 @@ describe EmberCli::PathSet do
     end
   end
 
+  describe "#package_manager" do
+    it "is npm by default" do
+      path_set = build_path_set
+
+      expect(path_set.package_manager).to eq :npm
+    end
+
+    it "is the package manager requested" do
+      app = build_app(options: { package_manager: :pnpm })
+      path_set = build_path_set(app: app)
+
+      expect(path_set.package_manager).to eq :pnpm
+    end
+
+    it "accepts the requested package manager as a String" do
+      app = build_app(options: { package_manager: "pnpm" })
+      path_set = build_path_set(app: app)
+
+      expect(path_set.package_manager).to eq :pnpm
+    end
+
+    it "is yarn when the deprecated yarn shorthand is given, with a warning" do
+      app = build_app(options: { yarn: true })
+      path_set = build_path_set(app: app)
+
+      expect { path_set.package_manager }.
+        to output(/`yarn` option.*deprecated.*package_manager: :yarn/).
+        to_stderr
+      expect(path_set.package_manager).to eq :yarn
+    end
+
+    it "warns about the yarn shorthand once" do
+      app = build_app(options: { yarn: true })
+      path_set = build_path_set(app: app)
+
+      expect(EmberCli.deprecator).to receive(:warn).once
+
+      2.times { path_set.package_manager }
+    end
+
+    it "prefers the package manager requested over the yarn shorthand" do
+      app = build_app(options: { package_manager: :pnpm, yarn: true })
+      path_set = build_path_set(app: app)
+
+      expect { path_set.package_manager }.not_to output.to_stderr
+      expect(path_set.package_manager).to eq :pnpm
+    end
+
+    it "is pnpm when only the pnpm executable is named" do
+      app = build_app(options: { pnpm_path: "/usr/bin/pnpm" })
+      path_set = build_path_set(app: app)
+
+      expect(path_set.package_manager).to eq :pnpm
+    end
+
+    it "rejects an unsupported package manager" do
+      app = build_app(options: { package_manager: :bun })
+      path_set = build_path_set(app: app)
+
+      expect { path_set.package_manager }.
+        to raise_error(ArgumentError, /Unsupported package manager :bun/)
+    end
+  end
+
   describe "#yarn?" do
     it "is true when yarn is requested" do
-      app = build_app(options: { yarn: true })
+      app = build_app(options: { package_manager: :yarn })
       path_set = build_path_set(app: app)
 
       expect(path_set).to be_yarn
@@ -248,7 +312,7 @@ describe EmberCli::PathSet do
     it "can be inferred from the $PATH" do
       fake_yarn = create_executable(ember_cli_root.join("yarn"))
       stub_which(yarn: fake_yarn.to_s)
-      app = build_app(options: { yarn: true })
+      app = build_app(options: { package_manager: :yarn })
       path_set = build_path_set(app: app)
       create_executable(fake_yarn)
 
@@ -261,7 +325,7 @@ describe EmberCli::PathSet do
       context "and yarn is requested" do
         it "raises a DependencyError" do
           stub_which(yarn: nil)
-          app = build_app(options: { yarn: true })
+          app = build_app(options: { package_manager: :yarn })
           path_set = build_path_set(app: app)
 
           expect { path_set.yarn }.to raise_error(EmberCli::DependencyError)
@@ -276,6 +340,75 @@ describe EmberCli::PathSet do
           yarn = path_set.yarn
 
           expect(yarn).to be_nil
+        end
+      end
+    end
+  end
+
+  describe "#pnpm?" do
+    it "is true when pnpm is requested" do
+      app = build_app(options: { package_manager: :pnpm })
+      path_set = build_path_set(app: app)
+
+      expect(path_set).to be_pnpm
+    end
+
+    it "is true when only the pnpm executable is named" do
+      app = build_app(options: { pnpm_path: "/usr/bin/pnpm" })
+      path_set = build_path_set(app: app)
+
+      expect(path_set).to be_pnpm
+    end
+
+    it "is false when pnpm is neither requested nor named" do
+      path_set = build_path_set
+
+      expect(path_set).not_to be_pnpm
+    end
+  end
+
+  describe "#pnpm" do
+    it "can be overridden" do
+      fake_pnpm = create_executable(ember_cli_root.join("pnpm"))
+      app = build_app(options: { pnpm_path: fake_pnpm.to_s })
+      path_set = build_path_set(app: app)
+
+      pnpm = path_set.pnpm
+
+      expect(pnpm).to eq(fake_pnpm).and(be_executable)
+    end
+
+    it "can be inferred from the $PATH" do
+      fake_pnpm = create_executable(ember_cli_root.join("pnpm"))
+      stub_which(pnpm: fake_pnpm.to_s)
+      app = build_app(options: { package_manager: :pnpm })
+      path_set = build_path_set(app: app)
+
+      pnpm = path_set.pnpm
+
+      expect(pnpm).to eq(fake_pnpm).and(be_executable)
+    end
+
+    context "when the executable isn't installed on the system" do
+      context "and pnpm is requested" do
+        it "raises a DependencyError pointing at pnpm's instructions" do
+          stub_which(pnpm: nil)
+          app = build_app(options: { package_manager: :pnpm })
+          path_set = build_path_set(app: app)
+
+          expect { path_set.pnpm }.
+            to raise_error(EmberCli::DependencyError, %r{https://pnpm.io/})
+        end
+      end
+
+      context "and pnpm is not requested" do
+        it "returns nil" do
+          stub_which(pnpm: nil)
+          path_set = build_path_set
+
+          pnpm = path_set.pnpm
+
+          expect(pnpm).to be_nil
         end
       end
     end

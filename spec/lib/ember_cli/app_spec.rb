@@ -34,11 +34,13 @@ describe EmberCli::App do
   end
 
   describe "#yarn?" do
-    context "when configured with yarn: true" do
+    context "when configured with the deprecated yarn: true" do
       it "returns true" do
         app = EmberCli::App.new("with-yarn", yarn: true)
 
-        expect(app.yarn?).to be true
+        yarn = EmberCli.deprecator.silence { app.yarn? }
+
+        expect(yarn).to be true
       end
     end
 
@@ -64,6 +66,34 @@ describe EmberCli::App do
 
         expect(app.yarn?).to be false
       end
+    end
+  end
+
+  describe "#package_manager" do
+    it "is npm by default" do
+      app = EmberCli::App.new("with-npm")
+
+      expect(app.package_manager).to eq :npm
+    end
+
+    it "is the package manager configured" do
+      app = EmberCli::App.new("with-pnpm", package_manager: :pnpm)
+
+      expect(app.package_manager).to eq :pnpm
+    end
+  end
+
+  describe "#pnpm?" do
+    it "returns true when configured with package_manager: :pnpm" do
+      app = EmberCli::App.new("with-pnpm", package_manager: :pnpm)
+
+      expect(app.pnpm?).to be true
+    end
+
+    it "returns false when configured with another package manager" do
+      app = EmberCli::App.new("with-yarn", package_manager: :yarn)
+
+      expect(app.pnpm?).to be false
     end
   end
 
@@ -120,6 +150,35 @@ describe EmberCli::App do
       app = EmberCli::App.new("with malformed package json")
 
       expect(app.node_engine).to be_nil
+    end
+
+    def stub_package_json(contents)
+      stub_paths(
+        package_json: double("Pathname", exist?: true, read: contents),
+      )
+    end
+  end
+
+  describe "#package_manager_spec" do
+    it "reads packageManager from the application's package.json" do
+      stub_package_json('{"packageManager":"pnpm@10.0.0"}')
+      app = EmberCli::App.new("with package manager")
+
+      expect(app.package_manager_spec).to eq "pnpm@10.0.0"
+    end
+
+    it "returns nil when the package.json declares no packageManager" do
+      stub_package_json('{"name":"frontend"}')
+      app = EmberCli::App.new("without package manager")
+
+      expect(app.package_manager_spec).to be_nil
+    end
+
+    it "returns nil when the package.json is absent" do
+      stub_paths(package_json: double("Pathname", exist?: false))
+      app = EmberCli::App.new("without package json")
+
+      expect(app.package_manager_spec).to be_nil
     end
 
     def stub_package_json(contents)

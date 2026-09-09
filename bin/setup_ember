@@ -7,6 +7,36 @@ set -e
 # classic Broccoli-based build.
 EMBER_VERSION="${EMBER_VERSION:-7.0.0}"
 
+# PACKAGE_MANAGER selects the package manager that installs the app's NodeJS
+# dependencies: `npm` (the default), `yarn`, or `pnpm`. The dummy
+# application's initializer reads the same variable, so that
+# `ember-cli-rails` is configured with the package manager that populated
+# `node_modules`.
+PACKAGE_MANAGER="${PACKAGE_MANAGER:-npm}"
+
+case "$PACKAGE_MANAGER" in
+  npm|yarn|pnpm)
+    ;;
+  *)
+    echo "Unsupported PACKAGE_MANAGER '${PACKAGE_MANAGER}'; use npm, yarn, or pnpm" >&2
+    exit 1
+    ;;
+esac
+
+add_dev_dependency() {
+  case "$PACKAGE_MANAGER" in
+    yarn)
+      yarn add --dev "$@"
+      ;;
+    pnpm)
+      pnpm add --save-dev "$@"
+      ;;
+    *)
+      npm install --save-dev "$@"
+      ;;
+  esac
+}
+
 setup_ember() {
   local target="${1-spec/dummy/my-app}"
 
@@ -30,13 +60,13 @@ setup_ember() {
     if [ -f "$target/vite.config.mjs" ]; then
       # `ember-cli-rails-addon` is incompatible with the Vite-based
       # blueprint, and `ember-cli-rails` does not require it there.
-      echo '-- Install NPM dependencies'
+      echo "-- Install NodeJS dependencies with ${PACKAGE_MANAGER}"
       (cd $target &&
-        npm install)
+        $PACKAGE_MANAGER install)
     else
-      echo '-- Install ember-cli-rails-addon'
+      echo "-- Install ember-cli-rails-addon with ${PACKAGE_MANAGER}"
       (cd $target &&
-        npm install --save-dev ember-cli-rails-addon@rondale-sc/ember-cli-rails-addon)
+        add_dev_dependency ember-cli-rails-addon@rondale-sc/ember-cli-rails-addon)
     fi
 
     if [ -f "bower.json" ]; then
