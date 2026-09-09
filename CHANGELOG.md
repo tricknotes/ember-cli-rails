@@ -1,4 +1,4 @@
-main
+0.14.0
 ------
 
 * Add the `package_manager` option to install an application's NodeJS
