@@ -41,6 +41,7 @@ module EmberCli
 
     def build_errors
       error_lines.
+        map(&:chomp).
         reject { |line| is_blank_or_backtrace?(line) }.
         reject { |line| is_deprecation_warning?(line) }.
         reject { |line| is_building_notice?(line) }
@@ -75,11 +76,11 @@ module EmberCli
     end
 
     def raise_build_error!
-      backtrace = build_errors.first
-      message = "#{name.inspect} has failed to build: #{backtrace}"
+      errors = build_errors
+      message = "#{name.inspect} has failed to build: #{errors.join("\n")}"
 
       error = BuildError.new(message)
-      error.set_backtrace(backtrace)
+      error.set_backtrace(errors)
 
       fail error
     end

@@ -56,6 +56,62 @@ describe EmberCli::BuildMonitor do
       end
     end
 
+    context "when the error file describes the file that failed to build" do
+      it "raises a BuildError reporting every line of the failure" do
+        error_file = error_file_with_contents(
+          [
+            "Build failed.",
+            "File: app/templates/application.hbs",
+            "Parse error on line 4:",
+            "    at AStackTrace",
+          ])
+        paths = build_paths(error_file)
+        monitor = EmberCli::BuildMonitor.new("app-name", paths)
+
+        expect { monitor.check! }.
+          to raise_error(
+            EmberCli::BuildError,
+            %{"app-name" has failed to build: Build failed.\nFile: app/templates/application.hbs\nParse error on line 4:},
+          )
+      end
+
+      it "sets the backtrace to the lines of the failure" do
+        error_file = error_file_with_contents(
+          [
+            "File: app/templates/application.hbs",
+            "Parse error on line 4:",
+          ])
+        paths = build_paths(error_file)
+        monitor = EmberCli::BuildMonitor.new("app-name", paths)
+
+        expect { monitor.check! }.to raise_error(EmberCli::BuildError) do |error|
+          expect(error.backtrace).to eq(
+            [
+              "File: app/templates/application.hbs",
+              "Parse error on line 4:",
+            ])
+        end
+      end
+    end
+
+    context "when the error file's lines end in newlines" do
+      it "raises a BuildError without the trailing newlines" do
+        error_file = error_file_with_contents(
+          [
+            "File: app/templates/application.hbs\n",
+            "Parse error on line 4:\n",
+          ])
+        paths = build_paths(error_file)
+        monitor = EmberCli::BuildMonitor.new("app-name", paths)
+
+        expect { monitor.check! }.
+          to raise_error(
+            EmberCli::BuildError,
+            %{"app-name" has failed to build: File: app/templates/application.hbs\nParse error on line 4:},
+          )
+      end
+    end
+
     context "when the error file only contains deprecation warnings" do
       it "does not raise a BuildError" do
         error_file = error_file_with_contents(
