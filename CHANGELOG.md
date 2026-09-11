@@ -1,6 +1,12 @@
 main
 ------
 
+* Recognise an application as Vite-based from any of the six names Vite
+  resolves its configuration from, rather than only `vite.config.js`,
+  `vite.config.mjs` and `vite.config.ts`. An application configured in
+  `vite.config.mts`, `vite.config.cts` or `vite.config.cjs` was taken for a
+  classic one and served with `ember build --watch`, which a Vite-based
+  project rejects
 * Report the whole `ember build` failure in the `EmberCli::BuildError`
   message, instead of only its first line. The line naming the file that
   failed to build is rarely the first one the build tool writes, so a parse

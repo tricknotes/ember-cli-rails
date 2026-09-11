@@ -162,20 +162,14 @@ describe EmberCli::PathSet do
       expect(path_set).not_to be_vite
     end
 
-    it "is true when the app has a vite.config.mjs" do
-      app = build_app
-      create_file(app_root_for(app).join("vite.config.mjs"))
-      path_set = build_path_set(app: app)
+    EmberCli::PathSet::VITE_CONFIG_FILES.each do |config_file|
+      it "is true when the app has a #{config_file}" do
+        app = build_app
+        create_file(app_root_for(app).join(config_file))
+        path_set = build_path_set(app: app)
 
-      expect(path_set).to be_vite
-    end
-
-    it "is true when the app has a vite.config.js" do
-      app = build_app
-      create_file(app_root_for(app).join("vite.config.js"))
-      path_set = build_path_set(app: app)
-
-      expect(path_set).to be_vite
+        expect(path_set).to be_vite
+      end
     end
   end
 

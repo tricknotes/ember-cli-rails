@@ -4,6 +4,17 @@ module EmberCli
   class PathSet
     PACKAGE_MANAGERS = %i[npm yarn pnpm].freeze
 
+    # Every name Vite resolves its configuration file from. An application
+    # that keeps its configuration under any of them is Vite-based.
+    VITE_CONFIG_FILES = %w[
+      vite.config.js
+      vite.config.mjs
+      vite.config.cjs
+      vite.config.ts
+      vite.config.mts
+      vite.config.cts
+    ].freeze
+
     # npm ships with NodeJS, so it has no installation instructions of its own
     # to point at when its executable is missing.
     INSTALL_INSTRUCTIONS = {
@@ -55,8 +66,7 @@ module EmberCli
     # Apps generated with the Vite-based blueprint (`ember-cli >= 6.8`)
     # ship a Vite config file at their root.
     def vite?
-      %w[vite.config.mjs vite.config.js vite.config.ts].
-        any? { |config| root.join(config).exist? }
+      VITE_CONFIG_FILES.any? { |config| root.join(config).exist? }
     end
 
     def ember
