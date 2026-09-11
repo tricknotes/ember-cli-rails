@@ -1,4 +1,4 @@
-main
+0.14.1
 ------
 
 * Build a Vite-based application with `vite build`, the command its own
