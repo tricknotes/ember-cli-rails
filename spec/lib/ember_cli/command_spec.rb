@@ -77,6 +77,15 @@ describe EmberCli::Command do
       end
     end
 
+    context "when not configured to watch" do
+      it "omits the `--watcher` flag" do
+        paths = build_paths
+        command = build_command(paths: paths, options: { watcher: "foo" })
+
+        expect(command.build).not_to match(/--watcher/)
+      end
+    end
+
     context "when configured to watch" do
       it "includes the `--watch` flag" do
         paths = build_paths
