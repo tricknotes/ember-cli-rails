@@ -1,6 +1,9 @@
 main
 ------
 
+* Pass `--watcher` to `ember build` only when the build watches. The flag
+  names the backend that watches the file system, so it did nothing for a
+  one-off build
 * Build a Vite-based application with `vite build`, the command its own
   `build` script runs, rather than with `ember build`. `ember build --help`
   calls itself a "Vestigial command in Vite-based projects" and points at

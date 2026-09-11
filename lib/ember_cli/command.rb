@@ -86,11 +86,14 @@ module EmberCli
     # Builds the application with `ember build`, which watches for changes
     # when asked. A Vite-based project has no equivalent: `ember build` there
     # refuses `--watch`, and its development server watches instead.
+    #
+    # `--watcher` names the backend that watches, so it rides along only
+    # when the build watches.
     def ember_build(watch: false)
       line = Terrapin::CommandLine.new(paths.ember, [
         "build",
         ("--watch" if watch),
-        ("--watcher :watcher" if process_watcher),
+        ("--watcher :watcher" if watch && process_watcher),
         ("--silent" if silent?),
         "--environment :environment",
         "--output-path :output_path",
