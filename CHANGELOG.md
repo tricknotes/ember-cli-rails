@@ -1,6 +1,11 @@
 main
 ------
 
+* Build a Vite-based application with `vite build`, the command its own
+  `build` script runs, rather than with `ember build`. `ember build --help`
+  calls itself a "Vestigial command in Vite-based projects" and points at
+  that script. The output is unchanged; `silent` now quiets such a build
+  with `--logLevel error` rather than `ember build --silent`
 * Recognise an application as Vite-based from any of the six names Vite
   resolves its configuration from, rather than only `vite.config.js`,
   `vite.config.mjs` and `vite.config.ts`. An application configured in

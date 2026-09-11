@@ -77,7 +77,9 @@ c.app :frontend, path: "~/projects/my-ember-app"
 - `path` - the path where your Ember CLI application is located. The default
   value is the name of your app in the Rails root.
 
-- `silent` - this provides `--silent` option for Ember CLI commands to control verbosity of their output.
+- `silent` - quiets the build. A classic application is built with
+  `ember build --silent`; a Vite-based one with `vite build --logLevel error`,
+  which keeps errors while dropping the progress output.
 
 - `package_manager` - the package manager that installs the application's
   NodeJS dependencies: `:npm` (the default), `:yarn`, or `:pnpm`. Name the
