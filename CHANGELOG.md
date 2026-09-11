@@ -1,3 +1,12 @@
+main
+------
+
+* Report the whole `ember build` failure in the `EmberCli::BuildError`
+  message, instead of only its first line. The line naming the file that
+  failed to build is rarely the first one the build tool writes, so a parse
+  error was reported with its message and line number but no way to tell
+  which file it came from
+
 0.14.0
 ------
 
