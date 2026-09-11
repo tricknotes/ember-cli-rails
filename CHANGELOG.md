@@ -1,25 +1,29 @@
 main
 ------
 
-* Pass `--watcher` to `ember build` only when the build watches. The flag
-  names the backend that watches the file system, so it did nothing for a
-  one-off build
 * Build a Vite-based application with `vite build`, the command its own
   `build` script runs, rather than with `ember build`. `ember build --help`
   calls itself a "Vestigial command in Vite-based projects" and points at
-  that script. The output is unchanged; `silent` now quiets such a build
-  with `--logLevel error` rather than `ember build --silent`
+  that script. What the build writes is unchanged, and so is the classic
+  blueprint, which keeps building with `ember build`. The `silent` option
+  now quiets a Vite build with `--logLevel error`, which drops the progress
+  output and keeps the errors
 * Recognise an application as Vite-based from any of the six names Vite
   resolves its configuration from, rather than only `vite.config.js`,
   `vite.config.mjs` and `vite.config.ts`. An application configured in
   `vite.config.mts`, `vite.config.cts` or `vite.config.cjs` was taken for a
   classic one and served with `ember build --watch`, which a Vite-based
   project rejects
-* Report the whole `ember build` failure in the `EmberCli::BuildError`
-  message, instead of only its first line. The line naming the file that
-  failed to build is rarely the first one the build tool writes, so a parse
-  error was reported with its message and line number but no way to tell
-  which file it came from
+* Report the whole build failure of a classic application in the
+  `EmberCli::BuildError` message, instead of only its first line. Such an
+  application builds in the background, and `BuildMonitor` turns what
+  `ember build --watch` writes into the exception; the line naming the file
+  that failed to build is rarely the first one, so a parse error arrived
+  with its message and line number but no way to tell which file it came
+  from
+* Pass `--watcher` to `ember build` only when the build watches. The flag
+  names the backend that watches the file system, so it did nothing for a
+  one-off build
 
 0.14.0
 ------
