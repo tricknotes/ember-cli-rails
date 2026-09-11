@@ -106,8 +106,38 @@ describe EmberCli::Command do
     end
   end
 
+  describe "#build for a Vite-based application" do
+    it "builds a `vite build` command writing to the output path" do
+      paths = build_paths(vite?: true, vite: "path/to/vite", dist: "path/to/dist")
+      command = build_command(paths: paths)
+
+      expect(command.build).to match(%r{path/to/vite build})
+      expect(command.build).to match(/--mode 'development'/)
+      expect(command.build).to match(%r{--outDir 'path/to/dist'})
+      expect(command.build).to match(/--emptyOutDir/)
+    end
+
+    it "does not pass the flags `ember build` takes" do
+      paths = build_paths(vite?: true, vite: "path/to/vite")
+      command = build_command(paths: paths, options: { watcher: "events" })
+
+      expect(command.build(watch: true)).not_to match(/--watch/)
+      expect(command.build(watch: true)).not_to match(/--environment/)
+    end
+
+    it "quiets the build when configured to be silent" do
+      paths = build_paths(vite?: true, vite: "path/to/vite")
+
+      expect(build_command(paths: paths).build).not_to match(/--logLevel/)
+
+      command = build_command(paths: paths, options: { silent: true })
+
+      expect(command.build).to match(/--logLevel error/)
+    end
+  end
+
   def build_paths(**options)
-    double(options).as_null_object
+    double({ vite?: false }.merge(options)).as_null_object
   end
 
   def build_command(**options)

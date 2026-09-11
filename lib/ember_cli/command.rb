@@ -14,7 +14,11 @@ module EmberCli
     end
 
     def build(watch: false)
-      ember_build(watch: watch)
+      if paths.vite?
+        vite_build
+      else
+        ember_build(watch: watch)
+      end
     end
 
     # Boots Vite's development server for an application generated with the
@@ -43,6 +47,45 @@ module EmberCli
       options.fetch(:silent) { false }
     end
 
+    def build_environment
+      if EmberCli.env == "production"
+        "production"
+      else
+        "development"
+      end
+    end
+
+    # The Vite-based blueprint (`ember-cli >= 6.8`)
+    #
+    # Builds the application the way its own `build` script does.
+    # `ember build` still drives such a build today, but `ember build --help`
+    # calls it a "Vestigial command in Vite-based projects" and has dropped
+    # every option but `--environment`, `--suppress-sizes` and
+    # `--output-path`.
+    #
+    # `--emptyOutDir` is needed because the output directory is outside the
+    # Ember application, where Vite leaves stale files in place unless asked
+    # to clear them.
+    def vite_build
+      line = Terrapin::CommandLine.new(paths.vite, [
+        "build",
+        "--mode :mode",
+        "--outDir :output_path",
+        "--emptyOutDir",
+        ("--logLevel error" if silent?),
+      ].compact.join(" "))
+
+      line.command(
+        mode: build_environment,
+        output_path: paths.dist,
+      )
+    end
+
+    # The classic blueprint
+    #
+    # Builds the application with `ember build`, which watches for changes
+    # when asked. A Vite-based project has no equivalent: `ember build` there
+    # refuses `--watch`, and its development server watches instead.
     def ember_build(watch: false)
       line = Terrapin::CommandLine.new(paths.ember, [
         "build",
@@ -58,14 +101,6 @@ module EmberCli
         output_path: paths.dist,
         watcher: process_watcher,
       )
-    end
-
-    def build_environment
-      if EmberCli.env == "production"
-        "production"
-      else
-        "development"
-      end
     end
   end
 end
