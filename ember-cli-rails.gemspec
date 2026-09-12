@@ -25,5 +25,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec-rails", ">= 3.6.0", "< 9.0"
 
   spec.add_development_dependency "capybara-selenium"
-  spec.add_development_dependency "codeclimate-test-reporter", "~> 0.6.0"
 end
