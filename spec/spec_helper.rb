@@ -2,9 +2,6 @@
 # progress as it happens, so a slow or stuck job shows where it stopped.
 $stdout.sync = true
 
-require "codeclimate-test-reporter"
-CodeClimate::TestReporter.start
-
 ENV["RAILS_ENV"] = "test"
 
 require "dummy/application"
