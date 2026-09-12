@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "ember-cli-rails-assets", ">= 0.9.0", "< 1.0"
   spec.add_dependency "railties", ">= 4.2"
   spec.add_dependency "rack", ">= 2.1", "< 4.0"
-  spec.add_dependency "terrapin", "~> 0.6.0"
+  spec.add_dependency "terrapin", ">= 0.6.0", "< 2.0"
   spec.add_dependency "html_page", "~> 0.1.0"
 
   spec.add_development_dependency "generator_spec", "~> 0.9.0"

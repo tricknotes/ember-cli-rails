@@ -1,3 +1,8 @@
+main
+------
+
+* Accept terrapin `1.x` alongside `0.6`, which also lifts the `climate_control < 1.0` that pinning `0.6` imposed
+
 0.14.1
 ------
 
