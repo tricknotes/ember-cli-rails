@@ -51,6 +51,14 @@ module EmberCli
       @dist ||= ember_cli_root.join("apps", app_name).tap(&:mkpath)
     end
 
+    def assets
+      dist.join("assets")
+    end
+
+    def index_html
+      dist.join("index.html")
+    end
+
     def gemfile
       @gemfile ||= root.join("Gemfile")
     end

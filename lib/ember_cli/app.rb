@@ -1,7 +1,9 @@
 require "json"
 
 require "html_page/renderer"
+require "ember_cli/asset_map"
 require "ember_cli/path_set"
+require "ember_cli/startup_tags"
 require "ember_cli/shell"
 require "ember_cli/build_monitor"
 require "ember_cli/deploy/dev_server"
@@ -75,6 +77,34 @@ module EmberCli
       html.render
     end
 
+    # Whether the application is built by Vite (`ember-cli >= 6.8`) rather than
+    # by the classic Broccoli-based pipeline.
+    def vite?
+      paths.vite?
+    end
+
+    # The tags a Vite-based application needs to boot, as HTML strings, with
+    # `prepend` joined onto their root-relative URLs.
+    # When the application is served by the development server, the tags are
+    # read from the server and address it instead.
+    def startup_tags(prepend: "")
+      if dev_server?
+        StartupTags.new(dev_server.index_html, prefix: dev_server.origin).to_a
+      else
+        StartupTags.new(paths.index_html.read, prefix: prepend).to_a
+      end
+    end
+
+    # The paths of the assets a classic build boots from, relative to the
+    # directory the application is served from.
+    def javascript_assets
+      asset_map.javascripts
+    end
+
+    def stylesheet_assets
+      asset_map.stylesheets
+    end
+
     def install_dependencies
       @shell.install
     end
@@ -143,6 +173,14 @@ module EmberCli
     end
 
     private
+
+    def asset_map
+      AssetMap.new(
+        name: name,
+        index_html: paths.index_html,
+        assets_path: paths.assets,
+      )
+    end
 
     def package_json_value(*keys)
       package_json = paths.package_json
