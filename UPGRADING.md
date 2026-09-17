@@ -17,7 +17,8 @@ gem "ember-cli-rails-assets"
 ```
 
 Without that line the helpers are undefined, and rendering a layout that calls
-them raises `NoMethodError`.
+one fails with the `ActionView::Template::Error` raised from its `NoMethodError`.
+Everything else keeps working, so only the layouts that call the helpers break.
 
 An application that serves its Ember applications with `render_ember_app`, or
 mounts them with `mount_ember_app`, needs no change.
