@@ -77,6 +77,18 @@ describe EmberCli::AssetMap do
       expect { asset_map.javascripts }.
         to raise_error(EmberCli::BuildError, /bar-abc123\.js/)
     end
+
+    it "resolves a script nested in the build" do
+      assets_path = build_assets_path("highlight/js/highlight.min.js")
+      index_html = build_index_html(
+        %{<script src="assets/highlight/js/highlight.min.js"></script>},
+      )
+      asset_map = build_asset_map(index_html: index_html, assets_path: assets_path)
+
+      javascripts = asset_map.javascripts
+
+      expect(javascripts).to eq(["assets/highlight/js/highlight.min.js"])
+    end
   end
 
   describe "#stylesheets" do
@@ -94,6 +106,56 @@ describe EmberCli::AssetMap do
         "assets/bar-abc123.css",
         "assets/vendor-abc123.css",
       ])
+    end
+
+    it "resolves the stylesheets nested in the build" do
+      assets_path = build_assets_path(
+        "bar-abc123.css",
+        "font-awesome/css/font-awesome.min.css",
+      )
+      index_html = build_index_html(<<~HTML)
+        <link rel="stylesheet" href="assets/font-awesome/css/font-awesome.min.css">
+        <link rel="stylesheet" href="bar-abc123.css">
+      HTML
+      asset_map = build_asset_map(index_html: index_html, assets_path: assets_path)
+
+      stylesheets = asset_map.stylesheets
+
+      expect(stylesheets).to match_array([
+        "assets/font-awesome/css/font-awesome.min.css",
+        "assets/bar-abc123.css",
+      ])
+    end
+
+    it "resolves the stylesheets referenced through a `rootURL`" do
+      assets_path = build_assets_path(
+        "bar-abc123.css",
+        "font-awesome/css/font-awesome.min.css",
+      )
+      index_html = build_index_html(<<~HTML)
+        <link rel="stylesheet" href="/my-app/assets/font-awesome/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/my-app/assets/bar-abc123.css">
+      HTML
+      asset_map = build_asset_map(index_html: index_html, assets_path: assets_path)
+
+      stylesheets = asset_map.stylesheets
+
+      expect(stylesheets).to match_array([
+        "assets/font-awesome/css/font-awesome.min.css",
+        "assets/bar-abc123.css",
+      ])
+    end
+
+    it "prefers the asset whose path matches over one that only shares its basename" do
+      assets_path = build_assets_path("app.css", "font-awesome/css/app.css")
+      index_html = build_index_html(
+        %{<link rel="stylesheet" href="assets/font-awesome/css/app.css">},
+      )
+      asset_map = build_asset_map(index_html: index_html, assets_path: assets_path)
+
+      stylesheets = asset_map.stylesheets
+
+      expect(stylesheets).to eq(["assets/font-awesome/css/app.css"])
     end
 
     it "emits the stylesheets hosted outside the build as they are" do
@@ -141,7 +203,12 @@ describe EmberCli::AssetMap do
     dist.join("assets").tap do |assets|
       assets.mkpath
 
-      file_names.each { |file_name| FileUtils.touch(assets.join(file_name)) }
+      file_names.each do |file_name|
+        path = assets.join(file_name)
+
+        path.dirname.mkpath
+        FileUtils.touch(path)
+      end
     end
   end
 

@@ -6,8 +6,8 @@ require "ember_cli/url"
 module EmberCli
   # The assets a classic (Broccoli-based) build boots from.
   #
-  # The generated `index.html` refers to the assets it produced by their
-  # fingerprinted file names, so resolve every such reference against the files
+  # The generated `index.html` refers to the assets it produced by their path
+  # within the build, so resolve every such reference against the files
   # `ember build` wrote to the `assets` directory, and mount it onto `prepend`.
   # It may also point at assets the build does not produce, which are emitted
   # as they are.
@@ -56,31 +56,45 @@ module EmberCli
       elsif Url.remote?(url)
         url
       else
-        [prepend, asset_matching(File.basename(url))].join
+        [prepend, asset_matching(url)].join
       end
     end
 
-    def asset_matching(file_name)
-      pattern = /#{Regexp.escape(file_name)}\z/
-      asset = file_names.detect { |candidate| candidate =~ pattern }
+    # A reference carries directories the build output does not, such as the
+    # `assets` directory itself or the application's `rootURL`, so resolve it by
+    # the longest trailing path the document and the build output agree on.
+    # Matching on the file name alone would resolve an asset an addon ships in a
+    # subdirectory to whichever file happens to share its basename.
+    def asset_matching(url)
+      asset = path_suffixes(url).find { |suffix| file_paths.include?(suffix) }
 
-      if asset.nil?
-        fail BuildError, "Failed to find a built asset matching `#{file_name}`"
+      unless asset
+        fail BuildError, "Failed to find a built asset matching `#{url}`"
       end
 
       PREPEND + asset
     end
 
-    def file_names
-      @file_names ||= if assets_path.directory?
-                        assets_path.children.map { |path| path.basename.to_s }
+    def path_suffixes(url)
+      segments = url.split("/").reject(&:empty?)
+
+      segments.each_index.map { |index| segments[index..].join("/") }
+    end
+
+    # Every file in the `assets` directory, by its path within it, so that the
+    # assets nested in it are represented too.
+    def file_paths
+      @file_paths ||= if assets_path.directory?
+                        assets_path.glob("**/*", File::FNM_DOTMATCH).
+                          select(&:file?).
+                          map { |path| path.relative_path_from(assets_path).to_s }
                       else
                         []
                       end
     end
 
     def assert_built!
-      if file_names.empty?
+      if file_paths.empty?
         fail BuildError, <<~MSG
           Missing built assets for #{name.inspect} in `#{assets_path}`.
 
