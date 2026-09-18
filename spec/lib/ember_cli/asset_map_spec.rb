@@ -28,6 +28,47 @@ describe EmberCli::AssetMap do
         to raise_error(EmberCli::BuildError, /my-app/)
     end
 
+    it "mounts the build's scripts onto `prepend`" do
+      assets_path = build_assets_path("bar-abc123.js")
+      index_html = build_index_html(%{<script src="bar-abc123.js"></script>})
+      asset_map = build_asset_map(index_html: index_html, assets_path: assets_path)
+
+      javascripts = asset_map.javascripts(prepend: "http://example.com/")
+
+      expect(javascripts).to eq(["http://example.com/assets/bar-abc123.js"])
+    end
+
+    it "emits the scripts hosted outside the build as they are" do
+      assets_path = build_assets_path("bar-abc123.js")
+      index_html = build_index_html(<<~HTML)
+        <script src="bar-abc123.js"></script>
+        <script src="https://cdn.example.com/analytics.js"></script>
+        <script src="//cdn.example.com/protocol-relative.js"></script>
+      HTML
+      asset_map = build_asset_map(index_html: index_html, assets_path: assets_path)
+
+      javascripts = asset_map.javascripts(prepend: "http://example.com/")
+
+      expect(javascripts).to match_array([
+        "http://example.com/assets/bar-abc123.js",
+        "https://cdn.example.com/analytics.js",
+        "//cdn.example.com/protocol-relative.js",
+      ])
+    end
+
+    it "ignores a script that references no asset" do
+      assets_path = build_assets_path("bar-abc123.js")
+      index_html = build_index_html(<<~HTML)
+        <script>window.inline = true</script>
+        <script src="bar-abc123.js"></script>
+      HTML
+      asset_map = build_asset_map(index_html: index_html, assets_path: assets_path)
+
+      javascripts = asset_map.javascripts
+
+      expect(javascripts).to eq(["assets/bar-abc123.js"])
+    end
+
     it "raises a BuildError when a referenced asset is missing" do
       assets_path = build_assets_path("vendor-abc123.js")
       index_html = build_index_html(%{<script src="bar-abc123.js"></script>})
@@ -52,6 +93,24 @@ describe EmberCli::AssetMap do
       expect(stylesheets).to match_array([
         "assets/bar-abc123.css",
         "assets/vendor-abc123.css",
+      ])
+    end
+
+    it "emits the stylesheets hosted outside the build as they are" do
+      assets_path = build_assets_path("bar-abc123.css")
+      index_html = build_index_html(<<~HTML)
+        <link rel="stylesheet" href="bar-abc123.css">
+        <link rel="stylesheet" href="https://fonts.example.com/css?family=Frontend">
+        <link rel="stylesheet" href="//fonts.example.com/protocol-relative.css">
+      HTML
+      asset_map = build_asset_map(index_html: index_html, assets_path: assets_path)
+
+      stylesheets = asset_map.stylesheets(prepend: "http://example.com/")
+
+      expect(stylesheets).to match_array([
+        "http://example.com/assets/bar-abc123.css",
+        "https://fonts.example.com/css?family=Frontend",
+        "//fonts.example.com/protocol-relative.css",
       ])
     end
   end

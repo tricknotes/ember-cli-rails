@@ -31,9 +31,12 @@ calls this gem instead:
 
 * `EmberCli::Assets::Paths#vite?` is `EmberCli::App#vite?`
 * `EmberCli::Assets::Lookup#javascript_assets` and `#stylesheet_assets` are
-  `EmberCli::App#javascript_assets` and `#stylesheet_assets`
+  `EmberCli::App#javascript_assets` and `#stylesheet_assets`, which take the
+  `prepend:` the helpers used to join on themselves, and join it only onto the
+  assets that point into the build
 * `EmberCli::Assets::AssetMap` and `EmberCli::Assets::DirectoryAssetMap` are
   `EmberCli::AssetMap`, which the readers above go through
+* `EmberCli::Assets::Url` is `EmberCli::Url`
 * `EmberCli::Assets::BuildError` is `EmberCli::BuildError`, so rescue that
   instead
 

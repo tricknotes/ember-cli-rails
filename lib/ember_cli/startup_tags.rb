@@ -1,5 +1,7 @@
 require "nokogiri"
 
+require "ember_cli/url"
+
 module EmberCli
   # The tags a Vite-based application (`ember-cli >= 6.8`) needs to boot.
   #
@@ -30,12 +32,13 @@ module EmberCli
 
     attr_reader :html, :prefix
 
-    # Protocol-relative URLs (`//`) address another origin, so leave them alone.
+    # Only a root-relative URL points into what this application serves; one
+    # that resolves elsewhere (a CDN, a protocol-relative URL) is left alone.
     def prefix_urls(tag)
       URL_ATTRIBUTES.each do |attribute|
         value = tag[attribute]
 
-        if value&.start_with?("/") && !value.start_with?("//")
+        if value&.start_with?("/") && !Url.remote?(value)
           tag[attribute] = "#{prefix}#{value}"
         end
       end

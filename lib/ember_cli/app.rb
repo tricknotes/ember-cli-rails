@@ -95,14 +95,16 @@ module EmberCli
       end
     end
 
-    # The paths of the assets a classic build boots from, relative to the
-    # directory the application is served from.
-    def javascript_assets
-      asset_map.javascripts
+    # The URLs of the assets a classic build boots from, with `prepend` joined
+    # onto the ones that point into the build.
+    # An asset the build does not produce, such as one served by a CDN, is
+    # reported as the document refers to it.
+    def javascript_assets(prepend: "")
+      asset_map.javascripts(prepend: prepend)
     end
 
-    def stylesheet_assets
-      asset_map.stylesheets
+    def stylesheet_assets(prepend: "")
+      asset_map.stylesheets(prepend: prepend)
     end
 
     def install_dependencies
