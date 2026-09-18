@@ -3,12 +3,6 @@ require "nokogiri"
 require "ember_cli/url"
 
 module EmberCli
-  # The tags a Vite-based application (`ember-cli >= 6.8`) needs to boot.
-  #
-  # Vite builds declare their entry points in `index.html` — the configuration
-  # `<meta>` tag, the stylesheet and `modulepreload` links, and the ES module
-  # scripts — so extract them from the document, with `prefix` joined onto
-  # every root-relative URL.
   class StartupTags
     SELECTOR = [
       %{meta[name$="/config/environment"]},
@@ -32,8 +26,8 @@ module EmberCli
 
     attr_reader :html, :prefix
 
-    # Only a root-relative URL points into what this application serves; one
-    # that resolves elsewhere (a CDN, a protocol-relative URL) is left alone.
+    # Only a root-relative URL points into what this application serves, so a
+    # URL that resolves elsewhere is left alone.
     def prefix_urls(tag)
       URL_ATTRIBUTES.each do |attribute|
         value = tag[attribute]

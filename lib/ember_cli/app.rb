@@ -77,16 +77,10 @@ module EmberCli
       html.render
     end
 
-    # Whether the application is built by Vite (`ember-cli >= 6.8`) rather than
-    # by the classic Broccoli-based pipeline.
     def vite?
       paths.vite?
     end
 
-    # The tags a Vite-based application needs to boot, as HTML strings, with
-    # `prepend` joined onto their root-relative URLs.
-    # When the application is served by the development server, the tags are
-    # read from the server and address it instead.
     def startup_tags(prepend: "")
       if dev_server?
         StartupTags.new(dev_server.index_html, prefix: dev_server.origin).to_a
@@ -95,10 +89,6 @@ module EmberCli
       end
     end
 
-    # The URLs of the assets a classic build boots from, with `prepend` joined
-    # onto the ones that point into the build.
-    # An asset the build does not produce, such as one served by a CDN, is
-    # reported as the document refers to it.
     def javascript_assets(prepend: "")
       asset_map.javascripts(prepend: prepend)
     end
