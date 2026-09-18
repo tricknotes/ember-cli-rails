@@ -1,3 +1,45 @@
+# Asset helpers
+
+From `ember-cli-rails@1.0.0` and on, the asset helpers are no longer installed
+alongside this gem.
+
+`ember-cli-rails` interprets a built Ember application and serves it;
+`ember-cli-rails-assets` renders what it reports into an existing Rails layout.
+Those are separate jobs, and this gem no longer depends on the other to do them,
+so an application that renders `include_ember_script_tags` or
+`include_ember_stylesheet_tags` has to ask for the helpers itself:
+
+```ruby
+# Gemfile
+
+gem "ember-cli-rails"
+gem "ember-cli-rails-assets"
+```
+
+Without that line the helpers are undefined, and rendering a layout that calls
+one fails with the `ActionView::Template::Error` raised from its `NoMethodError`.
+Everything else keeps working, so only the layouts that call the helpers break.
+
+An application that serves its Ember applications with `render_ember_app`, or
+mounts them with `mount_ember_app`, needs no change.
+That is the recommended way to serve an EmberCLI application, and it has never
+involved the helpers.
+
+The helpers used to work out for themselves what a built application boots from.
+`ember-cli-rails` reports that now, so code that called into their internals
+calls this gem instead:
+
+* `EmberCli::Assets::Paths#vite?` is `EmberCli::App#vite?`
+* `EmberCli::Assets::Lookup#javascript_assets` and `#stylesheet_assets` are
+  `EmberCli::App#javascript_assets` and `#stylesheet_assets`, which take the
+  `prepend:` the helpers used to join on themselves, and join it only onto the
+  assets that point into the build
+* `EmberCli::Assets::AssetMap` and `EmberCli::Assets::DirectoryAssetMap` are
+  `EmberCli::AssetMap`, which the readers above go through
+* `EmberCli::Assets::Url` is `EmberCli::Url`
+* `EmberCli::Assets::BuildError` is `EmberCli::BuildError`, so rescue that
+  instead
+
 # EmberCLI support
 
 `ember-cli >= 6.8` generates applications that are built with [Vite] instead
