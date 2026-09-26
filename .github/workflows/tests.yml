@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     # Named explicitly so that `experimental` stays out of the job name.
-    name: "build (${{ matrix.ruby }}, ${{ matrix.rails }}, ${{ matrix.ember }}, ${{ matrix.package_manager }})"
+    name: "build (Ruby ${{ matrix.ruby }}, Rails ${{ matrix.rails }}, ember-cli ${{ matrix.ember }}, ${{ matrix.package_manager }})"
     runs-on: "ubuntu-latest"
 
     # Jobs normally finish in about 3 minutes; a hung job once ran for
@@ -76,7 +76,7 @@ jobs:
     - name: "Install NodeJS"
       uses: "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020" # v7.0.0
       with:
-        node-version: "22.x"
+        node-version: "26.x"
 
     - name: "Install Yarn"
       if: "matrix.package_manager == 'yarn'"
