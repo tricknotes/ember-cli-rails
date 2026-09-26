@@ -19,12 +19,12 @@ An application that serves its Ember applications with `render_ember_app`, or mo
 That is the recommended way to serve an EmberCLI application, and it has never involved the helpers.
 
 The helpers used to work out for themselves what a built application boots from.
-`ember-cli-rails` reports that now, so code that called into their internals calls this gem instead:
+`ember-cli-rails` reports that now, through `EmberCli::Embedding`, which wraps an application (`EmberCli::Embedding.new(EmberCli["frontend"])`) to embed it into a page of your own.
+Code that called into the helpers' internals calls this gem instead:
 
 * `EmberCli::Assets::Paths#vite?` is `EmberCli::App#vite?`
-* `EmberCli::Assets::Lookup#javascript_assets` and `#stylesheet_assets` are `EmberCli::App#javascript_assets` and `#stylesheet_assets`, which take the `prepend:` the helpers used to join on themselves, and join it only onto the assets that point into the build
-* `EmberCli::Assets::AssetMap` and `EmberCli::Assets::DirectoryAssetMap` are `EmberCli::AssetMap`, which the readers above go through
-* `EmberCli::Assets::Url` is `EmberCli::Url`
+* `EmberCli::Assets::Lookup#javascript_assets` and `#stylesheet_assets` are `EmberCli::Embedding#javascript_assets` and `#stylesheet_assets`, which take the `prepend:` the helpers used to join on themselves, and join it only onto the assets that point into the build
+* `EmberCli::Assets::AssetMap`, `EmberCli::Assets::DirectoryAssetMap` and `EmberCli::Assets::Url` have no replacement: `EmberCli::Embedding` reads the build with classes it keeps to itself
 * `EmberCli::Assets::BuildError` is `EmberCli::BuildError`, so rescue that instead
 
 # EmberCLI support

@@ -3,6 +3,7 @@ require "active_support/deprecation"
 require "ember_cli/engine"
 require "ember_cli/configuration"
 require "ember_cli/helpers"
+require "ember_cli/embedding"
 require "ember_cli/errors"
 
 module EmberCli
