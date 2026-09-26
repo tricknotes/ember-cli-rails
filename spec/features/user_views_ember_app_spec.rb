@@ -8,6 +8,14 @@ feature "User views ember app", :js do
   end
 
   context "using custom controller" do
+    scenario "embedding the assets the application reports into a page" do
+      visit embedded_path
+
+      expect(page).to have_client_side_asset
+      expect(page).to have_javascript_rendered_text
+      expect(page).to have_no_csrf_tags
+    end
+
     scenario "rendering with index helper" do
       visit include_index_path
 

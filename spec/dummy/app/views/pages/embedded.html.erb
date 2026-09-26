@@ -1,0 +1,12 @@
+<% app = EmberCli["my-app"] %>
+<% app.build %>
+<% if app.vite? %>
+  <%= safe_join(app.startup_tags.map(&:html_safe), "\n") %>
+<% else %>
+  <% app.javascript_assets.each do |src| %>
+    <script src="<%= src %>"></script>
+  <% end %>
+  <% app.stylesheet_assets.each do |href| %>
+    <link rel="stylesheet" href="<%= href %>">
+  <% end %>
+<% end %>

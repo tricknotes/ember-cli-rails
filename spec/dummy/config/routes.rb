@@ -20,6 +20,13 @@ Rails.application.routes.draw do
       id: "include_index_head_and_body",
       as: "include_index_head_and_body",
     )
+
+    app.mount_ember_app(
+      "my-app",
+      to: "/embed",
+      id: "embedded",
+      as: "embedded",
+    )
   end
 
   mount_ember_app(
