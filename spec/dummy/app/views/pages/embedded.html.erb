@@ -1,6 +1,13 @@
-<%= include_ember_script_tags "my-app" %>
-<%# For Vite-based apps, `include_ember_script_tags` already emits the
-    stylesheet tags, and `include_ember_stylesheet_tags` is classic-only. %>
-<% unless EmberCli["my-app"].paths.vite? %>
-  <%= include_ember_stylesheet_tags "my-app" %>
+<% app = EmberCli["my-app"] %>
+<% app.build %>
+<% embedding = EmberCli::Embedding.new(app) %>
+<% if embedding.startup_tags? %>
+  <%= safe_join(embedding.startup_tags.map(&:html_safe), "\n") %>
+<% else %>
+  <% embedding.javascript_assets.each do |src| %>
+    <script src="<%= src %>"></script>
+  <% end %>
+  <% embedding.stylesheet_assets.each do |href| %>
+    <link rel="stylesheet" href="<%= href %>">
+  <% end %>
 <% end %>
