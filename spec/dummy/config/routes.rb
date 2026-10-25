@@ -23,7 +23,7 @@ Rails.application.routes.draw do
 
     app.mount_ember_app(
       "my-app",
-      to: "/asset-helpers",
+      to: "/embed",
       id: "embedded",
       as: "embedded",
     )

@@ -75,6 +75,10 @@ module EmberCli
       html.render
     end
 
+    def vite?
+      paths.vite?
+    end
+
     def install_dependencies
       @shell.install
     end

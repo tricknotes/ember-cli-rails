@@ -568,8 +568,14 @@ end
 Rendering EmberCLI applications with `render_ember_app` is the recommended,
 actively supported method of serving EmberCLI applications.
 
-However, for the sake of backwards compatibility, `ember-cli-rails` supports
-injecting the EmberCLI-generated assets into an existing Rails layout.
+However, for the sake of backwards compatibility, the EmberCLI-generated assets
+can be injected into an existing Rails layout.
+The helpers that do that ship in [ember-cli-rails-assets], so add it to the
+`Gemfile` alongside this gem:
+
+```ruby
+gem "ember-cli-rails-assets"
+```
 
 **Note:** for Vite-based applications (generated with `ember-cli >= 6.8`),
 use `include_ember_script_tags` on its own. It emits everything the
