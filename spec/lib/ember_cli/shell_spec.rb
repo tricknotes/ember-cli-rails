@@ -48,6 +48,8 @@ describe EmberCli::Shell do
 
     # Each package manager is a script that records its command line, and
     # `ember` is `true` so that the installed dependencies count as valid.
+    # The scripts live in a directory whose name contains a space, so the
+    # commands only run when their paths are quoted.
     def build_installing_shell(package_manager:)
       paths = double(
         "EmberCli::PathSet",
@@ -69,7 +71,7 @@ describe EmberCli::Shell do
       install_root.join(name).tap do |script|
         script.write(<<~SH)
           #!/bin/sh
-          echo "#{name} $*" >> #{commands_log}
+          echo "#{name} $*" >> "#{commands_log}"
         SH
         script.chmod(0o755)
       end
@@ -84,7 +86,7 @@ describe EmberCli::Shell do
     end
 
     def install_root
-      @install_root ||= Pathname.new(Dir.mktmpdir("ember-cli-rails-install"))
+      @install_root ||= Pathname.new(Dir.mktmpdir("ember-cli-rails install"))
     end
 
     after do

@@ -1,3 +1,12 @@
+main
+------
+
+* Quote the paths of the executables `ember-cli-rails` runs (`ember`, `vite`,
+  `npm`, `yarn`, `pnpm`, `bower` and `bundler`) before handing their command
+  lines to the shell. An application, or an executable configured with an
+  option such as `npm_path`, under a directory whose name contained a space
+  or another character the shell treats specially failed to build or install
+
 0.14.2
 ------
 

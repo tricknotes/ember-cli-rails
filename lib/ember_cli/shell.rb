@@ -1,3 +1,5 @@
+require "shellwords"
+
 require "ember_cli/command"
 require "ember_cli/runner"
 
@@ -62,7 +64,7 @@ module EmberCli
 
     def install
       if paths.gemfile.exist?
-        run! "#{paths.bundler} install"
+        run! "#{executable(paths.bundler)} install"
       end
 
       if invalid_ember_dependencies?
@@ -71,15 +73,17 @@ module EmberCli
 
       case paths.package_manager
       when :yarn
-        run! "#{paths.yarn} install"
+        run! "#{executable(paths.yarn)} install"
       when :pnpm
-        run! "#{paths.pnpm} install"
+        run! "#{executable(paths.pnpm)} install"
       else
-        run! "#{paths.npm} prune && #{paths.npm} install"
+        npm = executable(paths.npm)
+        run! "#{npm} prune && #{npm} install"
       end
 
       if paths.bower_json.exist?
-        run! "#{paths.bower} prune && #{paths.bower} install"
+        bower = executable(paths.bower)
+        run! "#{bower} prune && #{bower} install"
       end
     end
 
@@ -94,8 +98,14 @@ module EmberCli
 
     delegate :run, :run!, to: :runner
 
+    # The executables come from configuration and the filesystem, so quote
+    # them before interpolating them into a command line for the shell.
+    def executable(path)
+      Shellwords.escape(path.to_s)
+    end
+
     def invalid_ember_dependencies?
-      !run("#{paths.ember} version").success?
+      !run("#{executable(paths.ember)} version").success?
     rescue DependencyError
       false
     end
