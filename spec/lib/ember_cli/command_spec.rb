@@ -8,6 +8,14 @@ describe EmberCli::Command do
 
       expect(command.test).to eq("path\/to\/ember test --environment test")
     end
+
+    it "quotes an `ember` executable whose path contains spaces" do
+      paths = build_paths(ember: "path with spaces/ember")
+      command = build_command(paths: paths)
+
+      expect(command.test).
+        to eq("path\\ with\\ spaces/ember test --environment test")
+    end
   end
 
   describe "#build" do
@@ -124,6 +132,13 @@ describe EmberCli::Command do
       expect(command.build).to match(/--mode 'development'/)
       expect(command.build).to match(%r{--outDir 'path/to/dist'})
       expect(command.build).to match(/--emptyOutDir/)
+    end
+
+    it "quotes a `vite` executable whose path contains spaces" do
+      paths = build_paths(vite?: true, vite: "path with spaces/vite")
+      command = build_command(paths: paths)
+
+      expect(command.build).to start_with("path\\ with\\ spaces/vite build")
     end
 
     it "does not pass the flags `ember build` takes" do

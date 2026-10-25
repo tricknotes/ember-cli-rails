@@ -1,3 +1,4 @@
+require "shellwords"
 require "terrapin"
 
 module EmberCli
@@ -8,7 +9,7 @@ module EmberCli
     end
 
     def test
-      line = Terrapin::CommandLine.new(paths.ember, "test --environment test")
+      line = Terrapin::CommandLine.new(executable(paths.ember), "test --environment test")
 
       line.command
     end
@@ -25,7 +26,7 @@ module EmberCli
     # Vite-based blueprint (`ember-cli >= 6.8`). This is what the blueprint's
     # own `npm start` script runs.
     def dev_server(host:, port:)
-      line = Terrapin::CommandLine.new(paths.vite, [
+      line = Terrapin::CommandLine.new(executable(paths.vite), [
         "--host :host",
         "--port :port",
         "--strictPort",
@@ -38,6 +39,13 @@ module EmberCli
     private
 
     attr_reader :options, :paths
+
+    # Terrapin quotes the values it interpolates into a command line, but not
+    # the executable it starts with, so quote that before it reaches the
+    # shell.
+    def executable(path)
+      Shellwords.escape(path.to_s)
+    end
 
     def process_watcher
       options.fetch(:watcher) { EmberCli.configuration.watcher }
@@ -67,7 +75,7 @@ module EmberCli
     # Ember application, where Vite leaves stale files in place unless asked
     # to clear them.
     def vite_build
-      line = Terrapin::CommandLine.new(paths.vite, [
+      line = Terrapin::CommandLine.new(executable(paths.vite), [
         "build",
         "--mode :mode",
         "--outDir :output_path",
@@ -90,7 +98,7 @@ module EmberCli
     # `--watcher` names the backend that watches, so it rides along only
     # when the build watches.
     def ember_build(watch: false)
-      line = Terrapin::CommandLine.new(paths.ember, [
+      line = Terrapin::CommandLine.new(executable(paths.ember), [
         "build",
         ("--watch" if watch),
         ("--watcher :watcher" if watch && process_watcher),
