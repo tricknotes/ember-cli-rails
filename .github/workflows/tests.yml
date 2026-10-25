@@ -6,6 +6,11 @@ on:
       - main
   pull_request:
 
+# Builds run third-party code (gems, npm packages, the latest pnpm 10), so
+# hand them a token that can only read the repository.
+permissions:
+  contents: read
+
 jobs:
   build:
     # Named explicitly so that `experimental` stays out of the job name.
@@ -72,6 +77,8 @@ jobs:
 
     steps:
     - uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
+      with:
+        persist-credentials: false
 
     - name: "Install NodeJS"
       uses: "actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1" # v7.1.0
