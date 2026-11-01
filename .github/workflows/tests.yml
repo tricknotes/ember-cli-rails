@@ -76,12 +76,12 @@ jobs:
       PACKAGE_MANAGER: "${{ matrix.package_manager }}"
 
     steps:
-    - uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
+    - uses: "actions/checkout@v7.0.1"
       with:
         persist-credentials: false
 
     - name: "Install NodeJS"
-      uses: "actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1" # v7.1.0
+      uses: "actions/setup-node@v7.1.0"
       with:
         node-version: "26.x"
 
@@ -96,7 +96,7 @@ jobs:
         npm install -g pnpm@latest-10
 
     - name: "Install Ruby ${{ matrix.ruby }}"
-      uses: "ruby/setup-ruby@824c0e29fdfc7d689c191c27acc969d2d04b7dd8" # v1.331.0
+      uses: "ruby/setup-ruby@v1.331.0"
       with:
         ruby-version: "${{ matrix.ruby }}"
         bundler-cache: true
