@@ -1,0 +1,30 @@
+name: "actions-lock"
+
+on:
+  push:
+  # Detect tags moved upstream even when no workflow has changed
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: "read"
+
+jobs:
+  verify:
+    runs-on: "ubuntu-latest"
+
+    timeout-minutes: 10
+
+    env:
+      GH_TOKEN: "${{ github.token }}"
+
+    steps:
+    - uses: "actions/checkout@v7.0.1"
+      with:
+        persist-credentials: false
+
+    - run: |
+        gh extension install github/gh-actions-lock --pin v0.4.0
+
+    - run: |
+        gh actions-lock --verify
