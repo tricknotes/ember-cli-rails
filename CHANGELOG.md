@@ -6,6 +6,12 @@ main
   lines to the shell. An application, or an executable configured with an
   option such as `npm_path`, under a directory whose name contained a space
   or another character the shell treats specially failed to build or install
+* Stop passing `format: :html` to the route `mount_ember_app` draws. Rails
+  ignored a Symbol `format:` until rails/rails#59418, which makes it a
+  format requirement with `html` as the default. With it, the route's glob
+  swallowed the extension of an asset path such as `/assets/app.js`, so the
+  request was treated as HTML and answered with the application's
+  `index.html` instead of reaching the mounted assets
 
 0.14.2
 ------
