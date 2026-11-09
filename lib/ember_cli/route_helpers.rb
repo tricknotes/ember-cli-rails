@@ -12,7 +12,6 @@ module ActionDispatch
         routing_options.reverse_merge!(
           controller: "ember_cli/ember",
           action: "index",
-          format: :html,
         )
 
         scope constraints: ::EmberCli::EmberConstraint.new do
