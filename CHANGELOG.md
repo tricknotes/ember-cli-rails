@@ -1,4 +1,4 @@
-main
+0.14.3
 ------
 
 * Quote the paths of the executables `ember-cli-rails` runs (`ember`, `vite`,
