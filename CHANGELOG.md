@@ -1,4 +1,4 @@
-main
+0.14.4
 ------
 
 * Read the mount point `render_ember_app` remaps a Vite build's asset URLs
@@ -7,6 +7,7 @@ main
   query string, so a link such as `/?ember_mount_point=//attacker.example`
   made the page load its scripts and stylesheets from another host (a
   reflected XSS). Affects Vite-based applications since 0.13.2
+  ([GHSA-whxv-9q4m-932c](https://github.com/tricknotes/ember-cli-rails/security/advisories/GHSA-whxv-9q4m-932c))
 
 0.14.3
 ------
