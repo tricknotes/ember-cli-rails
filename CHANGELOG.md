@@ -1,3 +1,13 @@
+main
+------
+
+* Read the mount point `render_ember_app` remaps a Vite build's asset URLs
+  onto from the route `mount_ember_app` draws, rather than from `params`. A
+  page that called `render_ember_app` from any other route took it from the
+  query string, so a link such as `/?ember_mount_point=//attacker.example`
+  made the page load its scripts and stylesheets from another host (a
+  reflected XSS). Affects Vite-based applications since 0.13.2
+
 0.14.3
 ------
 

@@ -36,6 +36,13 @@ Rails.application.routes.draw do
     as: "dev_server_app",
   )
 
+  # Renders the Ember application from a route `mount_ember_app` did not draw.
+  get(
+    "/outside-the-mount",
+    to: "high_voltage/pages#show",
+    id: "include_index",
+  )
+
   mount_ember_app(
     "my-app",
     to: "/",
