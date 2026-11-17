@@ -14,7 +14,9 @@ Dummy::Application.initialize!
 # own stubs: `mount_ember_app` asks the application whether its deploy is
 # mountable, which a stubbed deploy cannot answer. Draw them up front, as
 # earlier versions of Rails do while initializing.
-Rails.application.try(:reload_routes_unless_loaded)
+if Rails.application.respond_to?(:reload_routes_unless_loaded)
+  Rails.application.reload_routes_unless_loaded
+end
 
 Dir["spec/support/**/*.rb"].sort.each { |file| require "./#{file}" }
 
