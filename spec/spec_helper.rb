@@ -9,6 +9,13 @@ require "rspec/rails"
 
 Dummy::Application.initialize!
 
+# Rails 8.0+ puts off drawing the routes until a request first needs them, so
+# whichever example makes the suite's first request would draw them under its
+# own stubs: `mount_ember_app` asks the application whether its deploy is
+# mountable, which a stubbed deploy cannot answer. Draw them up front, as
+# earlier versions of Rails do while initializing.
+Rails.application.try(:reload_routes_unless_loaded)
+
 Dir["spec/support/**/*.rb"].sort.each { |file| require "./#{file}" }
 
 RSpec.configure do |config|
